@@ -8,10 +8,10 @@ from apso_utils import xray, mri, msgbox
 import uno
 import unohelper
 from com.sun.star.awt import XActionListener
+from com.sun.star.util import Date
 
-FORM_PADDING = 10
-LABEL_SPACING = 5
-FIELD_SPACING = 5
+from datetime import datetime
+
 
 # Reference to current document
 def This():  
@@ -44,12 +44,11 @@ SECTION = Section('Transactions', This())
 class MyActionListener( unohelper.Base, XActionListener ):
   def __init__(self, dialogObj):
     self.__dialogObj = dialogObj
+    # for blop in self.__dialogObj.Controls:
+    #   SECTION.Error(blop)
     # self.__dialogObj.Controls[0].Model.Label
  
   def actionPerformed(self, actionEvent):
-    xray(self.__dialogObj.Controls[1])
-    for blop in self.__dialogObj.Controls:
-      SECTION.Error(blop.Model.Type)
     SaveTransactionsForm()
 
 # Interface button call
@@ -58,6 +57,7 @@ def GenerateTransactionsSheet(self):
 
 # Temporary called as test
 def OpenTransactionsForm(self):
+
     # Dialog layout
     ctx = uno.getComponentContext()
     smgr = ctx.ServiceManager
@@ -70,45 +70,64 @@ def OpenTransactionsForm(self):
 
     y = 0
     # Fields
-    for model in SECTION.Model:
+    for index, model in enumerate(SECTION.Model):
 
-      fieldH = 14
-      labelH = 10
+      # Convert types to UNO objects
+      types = {
+        'String': 'UnoControlEditModel',
+        'Integer': 'UnoControlEditModel',
+        'Date': 'UnoControlDateFieldModel',
+        'Amount': 'UnoControlCurrencyFieldModel',
+        'CheckBox': 'UnoControlCheckBoxModel'
+      }
+      
+      # Position variables
+      FORM_PADDING = 10
+      FIELD_SPACING = 5
+      FIELD_HEIGHT = 14
+      LABEL_HEIGHT = 10
 
-      fieldWidth = model['width']
-      columnIndex = model['column']
-      fieldName = model['field']
-
+      # Field label
       label = dialogModel.createInstance("com.sun.star.awt.UnoControlFixedTextModel" )
       label.PositionX = FORM_PADDING
-      label.PositionY = FORM_PADDING + (y * (fieldH + FIELD_SPACING) ) + ((y - 1) * labelH)
-      label.Width  = fieldWidth * 15 
-      label.Height = labelH
-      label.Name = fieldName + 'Label'
+      label.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + ((index - 1) * LABEL_HEIGHT)
+      label.Width  = model['width'] * 15 
+      label.Height = LABEL_HEIGHT
+      label.Name = model['field'] + 'Label'
       label.Label = model['label']
 
-      field = dialogModel.createInstance("com.sun.star.awt.UnoControlEditModel" )
+      # Field control
+      field = dialogModel.createInstance("com.sun.star.awt." + types[model['type']] )
       field.PositionX = FORM_PADDING
-      field.PositionY = FORM_PADDING + (y * (fieldH + FIELD_SPACING) ) + (y * labelH)
-      field.Width  = fieldWidth * 15 
-      field.Height = fieldH
-      field.Name = fieldName
-      field.TabIndex = columnIndex
+      field.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + (index * LABEL_HEIGHT)
+      field.Width  = model['width'] * 15 
+      field.Height = FIELD_HEIGHT
+      field.Name = model['field']
+      field.TabIndex = model['column']
 
-      dialogModel.insertByName( fieldName + 'Label', label)
-      dialogModel.insertByName( fieldName, field)
-      y += 1
+      # Type-dependant properties
+      if model['type'] == 'Date':
+        field.Dropdown = True
+        field.Spin = True
+        field.Date = Date(5, 10, 2020)
+      if model['type'] == 'Amount':
+        field.Spin = True
+        field.Value = 0
+
+      # Insert fields
+      dialogModel.insertByName( model['field'] + 'Label', label)
+      dialogModel.insertByName( model['field'], field)
 
     # Button
     button = dialogModel.createInstance("com.sun.star.awt.UnoControlButtonModel" )
-    button.PositionX = 50
+    button.PositionX = 100
     button.PositionY  = 30
     button.Width = 50
     button.Height = 14
     button.Name = "Submit"
     button.TabIndex = 99 
     button.Label = "Save"
-    dialogModel.insertByName( "Submit", button)
+    dialogModel.insertByName("Submit", button)
 
     # create the dialog control and set the model
     DialogObj = smgr.createInstanceWithContext("com.sun.star.awt.UnoControlDialog", ctx)
