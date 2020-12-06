@@ -4,7 +4,7 @@ from Cell import Cell
 from datetime import datetime
 
 from apso_utils import xray, mri, msgbox 
-
+ 
 # --------------------------------------------------------------------------------------------------------
 # Class SECTION
 # Wrapper for document context and associated data sheet
@@ -16,7 +16,7 @@ from apso_utils import xray, mri, msgbox
 #     - 'FirstRow'      => First row of the list section in main sheet
 #     - 'DataFirstRow'  => First row of the Model in the data sheet
 
-
+ 
 class Section:
 
   def __init__(self, name, documentContext):
@@ -77,5 +77,7 @@ class Section:
     else: 
       log = str(cell.value()) if cell.value() != None else ''
       ts = datetime.now().strftime("%H:%M:%S")
-      cell.setValue(ts + ': ' + msg + '\n' + log)
-          
+      cell.setValue(ts + ': ' + str(msg) + '\n' + log)
+            
+  def SaveForm(self):
+    msgbox("blop")
