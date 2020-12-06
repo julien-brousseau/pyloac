@@ -1,25 +1,40 @@
-
+# Imports
 from Sheet import Sheet 
 from Cell import Cell 
-from apso_utils import xray, mri, msgbox
+
+from apso_utils import xray, mri, msgbox 
 
 # --------------------------------------------------------------------------------------------------------
 # Class SECTION
+# Wrapper for document context and associated data sheet
+# Requirements:
+#   - Sheet in the current document with the same name as constructor argument (ex: 'Transactions')
+#   - Sheet in the current document for section settings, named with appended "Data" (ex: 'TransactionsData')
+#     containing the following named cells:
+#     - 'Error'         => Error log for the section
+#     - 'FirstRow'      => First row of the list section in main sheet
+#     - 'DataFirstRow'  => First row of the Model in the data sheet
+
 
 class Section:
 
   def __init__(self, name, documentContext):
     self.Name = name
     self.__documentContext = documentContext
+
+    # Associated Sheets
     self.__sheet = Sheet(self.Name, self.__documentContext)
     self.__dataSheet = Sheet(self.Name + 'Data', self.__documentContext)
 
+    # Custom settings from Data Sheet
     self.__firstRow = Cell('FirstRow', self.__dataSheet).value()
     self.__dataFirstRow = Cell('DataFirstRow', self.__dataSheet).value()
-    self.refreshData()
-    self.__columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Data)]
+
+    # Section data model
+    self.refreshModel()
+    self.__columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Model)]
       
-  # 
+  # Fetch column info on the current section Data Sheet
   def __ModelFromData(self):
     # Fetch column headers
     headers = []
@@ -39,17 +54,24 @@ class Section:
       cell.offset(len(headers) * -1, 1)
     # msgbox(str(arr))
     return arr
-  #
-  def refreshData(self):
-    self.Data = self.__ModelFromData()
+  
+  # Externally callable data refresh 
+  def refreshModel(self):
+    self.Model = self.__ModelFromData()
 
-  #
+  # Clear and rebuild column headers for current section
   def BuildColumnHeaders(self):
-    self.refreshData()
+    self.refreshModel()
     row = self.__firstRow
     self.__sheet.Clear(f"A{row}:Z{row}")
     cell = Cell([0, row - 1], self.__sheet)
     for column in self.__columns:
       cell.move(column['index'] - 1)
       cell.setValue(column['label'].upper())
-    return None
+
+  # Add an error to Data sheet's Error log
+  def Error(self, msg):
+      cell = Cell('Error', self.__dataSheet)
+      self.Instance.getCellRangeByName(cell).String = msg
+      else:
+          self.Clear(cell)
