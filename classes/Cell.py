@@ -48,6 +48,10 @@ class Cell:
     def toString(self):
         return str(self.value())
     
+    # Clear the contents of the cell
+    def Clear(self):
+        self.__range.clearContents(VALUE + DATETIME + STRING + FORMULA)
+        
     # Helpers
     def __letter(self, offset = 0):
         col = self.__x() + offset

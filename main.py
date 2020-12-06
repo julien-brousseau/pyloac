@@ -17,19 +17,20 @@ classes_dir = SCRIPTS_DIRECTORY + "/classes"
 sys.path.append(classes_dir) 
 for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
     name = os.path.basename(src_file)[:-3]  
-    importlib.import_module(name) 
+    importlib.import_module(name)  
     importlib.reload(sys.modules[name])   
- 
-# Import classes
-from Section import Section 
+   
+# Import classes  
+from Section import Section  
 from Sheet import Sheet   
 from Cell import Cell
 
-# App
+# App   
 SECTION = Section('Transactions', This())  
 
 def blop(self):  
-    SECTION.BuildColumnHeaders()
+    # SECTION.BuildColumnHeaders()
+    SECTION.Error('blop')  
 
 #   DIALOG TEST
 #     model = XSCRIPTCONTEXT.getDocument()

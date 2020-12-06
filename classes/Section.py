@@ -1,6 +1,7 @@
 # Imports
 from Sheet import Sheet 
 from Cell import Cell 
+from datetime import datetime
 
 from apso_utils import xray, mri, msgbox 
 
@@ -69,9 +70,12 @@ class Section:
       cell.move(column['index'] - 1)
       cell.setValue(column['label'].upper())
 
-  # Add an error to Data sheet's Error log
-  def Error(self, msg):
-      cell = Cell('Error', self.__dataSheet)
-      self.Instance.getCellRangeByName(cell).String = msg
-      else:
-          self.Clear(cell)
+  # Add an error to Data sheet's Error log (or clear log with no argument)
+  def Error(self, msg = None):
+    cell = Cell('Error', self.__dataSheet)
+    if not msg: cell.Clear()
+    else: 
+      log = str(cell.value()) if cell.value() != None else ''
+      ts = datetime.now().strftime("%H:%M:%S")
+      cell.setValue(ts + ': ' + msg + '\n' + log)
+          
