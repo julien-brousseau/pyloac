@@ -1,11 +1,11 @@
 # Module management
-import sys, os, glob, importlib 
+import sys, os, glob, importlib           
 
-# Debug tools
+# Debugging tools
 from apso_utils import xray, mri, msgbox 
 
 # Reference to current document
-def This():
+def This(): 
   return XSCRIPTCONTEXT.getDocument()
 
 # Fetch scripts directory from Settings Sheet
@@ -20,17 +20,17 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   importlib.reload(sys.modules[name])   
 
 # Import classes    
-from Section import Section  
-from Sheet import Sheet
+from Section import Section         
+from Sheet import Sheet   
 from Cell import Cell 
-
+  
 # Generate Sheet          
 SECTION = Section('Transactions', This())          
 
 # App
-def blop(self): 
+def blop(self):
   SECTION.OpenForm()
-  
+       
 # Interface button call
 def GenerateTransactionsSheet(self):  
   SECTION.BuildColumnHeaders()

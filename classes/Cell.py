@@ -1,6 +1,7 @@
-# Imports
+# Utilities
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
+# Debugging tools
 from apso_utils import xray, mri, msgbox
 
 # --------------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ class Cell:
         elif self.__range.CellContentType.value == 'EMPTY': return None
         else: return 'NOT IN RANGE: ' + self.__range.CellContentType.value
     def toString(self):
-        return str(self.value())
+        return str(self.__range.String)
     
     # Clear the contents of the cell
     def Clear(self):

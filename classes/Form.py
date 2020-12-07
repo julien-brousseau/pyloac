@@ -1,11 +1,12 @@
-# Imports
+# Utilities
 from com.sun.star.util import Date
 
-# test
+# Dialog control
 import uno
 import unohelper
 from com.sun.star.awt import XActionListener
 
+# Debugging tools
 from apso_utils import xray, mri, msgbox 
  
 # --------------------------------------------------------------------------------------------------------
@@ -68,12 +69,13 @@ class Form:
 
       # Type-dependant properties
       if model['type'] == 'Date':
+        d = self.__section.Today
         field.Dropdown = True
         field.Spin = True
-        field.Date = Date(5, 10, 2020)
-        field.Text = "2020-10-05"
+        field.Date = Date(*d.split('-')[::-1])
+        field.Text = d
         field.DateFormat = 11
-      if model['type'] == 'Amount':
+      elif model['type'] == 'Amount':
         field.Spin = True
         field.Value = 0
 

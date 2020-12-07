@@ -1,4 +1,4 @@
-# Imports
+# Utilities
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
 # --------------------------------------------------------------------------------------------------------

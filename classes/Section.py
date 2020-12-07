@@ -1,10 +1,12 @@
-# Imports
+# Classes
 from Sheet import Sheet 
 from Cell import Cell 
 from Form import Form
 
+# Utilities
 from datetime import datetime
 
+# Debugging tools
 from apso_utils import xray, mri, msgbox 
  
 # --------------------------------------------------------------------------------------------------------
@@ -37,6 +39,8 @@ class Section:
     self.Model = []
     self.refreshModel()
     self.__columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Model)]
+
+    self.Today = Cell('Today', Sheet('Settings', self.__documentContext)).toString()
       
   # Fetch column info on the current section Data Sheet
   def __ModelFromData(self):
@@ -90,7 +94,7 @@ class Section:
   #
   def AddNewLine(self, data):
     # msgbox('New Line!')
-    self.Error('new line')
+    self.Error(data)
 
   def Fields(self):
     return list(map(lambda col: col['field'], self.Model))
