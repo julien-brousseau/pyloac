@@ -22,17 +22,13 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 # Import classes    
 from Section import Section
 from Sheet import Sheet
-from Cell import Cell     
+from Cell import Cell
 
 # Generate Sheet          
 SECTION = Section('Transactions', This())
 
 # App
-def blop(self):
-  # start = [{'id': 'a', 'value': 'b'}, {'id': 'c', 'value': 'd'}]
-  # add = ['e', 'f']
-  # result = map(lambda a, b: dict(a, add = b), start, add) 
-  # SECTION.Error(list(result))
+def blop(self): 
   SECTION.OpenForm()
   
 # Interface button call
