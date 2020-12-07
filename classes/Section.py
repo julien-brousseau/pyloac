@@ -93,8 +93,11 @@ class Section:
 
   #
   def AddNewLine(self, data):
-    # msgbox('New Line!')
-    self.Error(data)
+    row = self.__sheet.NextEmptyRow()
+    for field in data:
+      coords = [field['column'] - 1, row - 1]
+      Cell(coords, self.__sheet).setValue(field['value'])
+      # self.Error('added: ' + str(cell))
 
   def Fields(self):
     return list(map(lambda col: col['field'], self.Model))

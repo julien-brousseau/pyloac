@@ -78,6 +78,8 @@ class Form:
       elif model['type'] == 'Amount':
         field.Spin = True
         field.Value = 0
+      else:
+        field.Text = model['default']
 
       # Insert fields
       dialogModel.insertByName( model['field'] + 'Label', label)

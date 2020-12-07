@@ -18,19 +18,19 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   name = os.path.basename(src_file)[:-3]  
   importlib.import_module(name)  
   importlib.reload(sys.modules[name])   
-
+  
 # Import classes    
 from Section import Section         
-from Sheet import Sheet   
+from Sheet import Sheet         
 from Cell import Cell 
   
-# Generate Sheet          
-SECTION = Section('Transactions', This())          
+# Generate Sheet            
+SECTION = Section('Transactions', This())            
 
-# App
-def blop(self):
-  SECTION.OpenForm()
-       
+# App 
+def blop(self):  
+  SECTION.OpenForm()  
+          
 # Interface button call
 def GenerateTransactionsSheet(self):  
   SECTION.BuildColumnHeaders()
