@@ -17,7 +17,7 @@ class Form:
     self.__section = section
     self.Data = None
 
-  #  
+  # Show form dialog based on section's model
   def Open(self):
     
     # Dialog layout
@@ -108,34 +108,55 @@ class Form:
     DialogObj.execute()
     DialogObj.dispose()
   
-  #
-  def Save(self, formData):
-    # Allowed fields (TODO: !Hardcoded)
-    columns = ['Date', 'Amount', 'Type', 'Description', 'File', 'FromAccount', 'ToAccount', 'Deductible', 'GigId', 'Id', 'User', 'TS']
+  # Validate form and handle success/failure
+  def Save(self, formDialog):
+    # Allowed fields
+    columns = self.__section.Fields()
     # Filter all allowed fields in dialog
-    filteredControls = filter(lambda c: c.Model.Name in columns, formData)
-    # # Fetch array of values from dialog
+    filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
+    # Fetch array of values from dialog
     formValues = list(map(lambda c: c.Text, filteredControls))
     # Create a copy of the Section's Model and add form values 
     self.Data = list(map(lambda model, value: dict(model, value = value), self.__section.Model, formValues))
+    
+    # Reset label color
+    labels = list(filter(lambda e: e.Model.Name[-5:] == 'Label', formDialog.Controls))
+    for label in labels:
+      label.Model.TextColor = 0x000000
+
+    # Validate fields and show errors
+    errors = self.__validateForm()
+    if errors:
+      # Change label color for error fields and show errors in log
+      for error in errors:
+        self.__section.Error(error['error'])
+        formDialog.getControl(error['field'].capitalize() + 'Label').Model.TextColor = 0xFF0000
+      # Return error to dialog
+      return errors
+    
+    # Add a new line
+    self.__section.AddNewLine(self.Data)
+    return False
   
-    # Validate form values, then add new line
-    if self.Validate():
-      self.__section.AddNewLine(self.Data)
-    else:
-      self.__section.Error('Validation failed')
-  
-  #
-  def Validate(self):
-    return True
+  # Validate fields against their required property
+  def __validateForm(self):
+    # Filter out metadata fields
+    ignoreFields = ['Id', 'User', 'TS']
+    data = list(filter(lambda f: f['field'] not in ignoreFields, self.Data))
+    # Validate each remaining field
+    validated = list(map(lambda d: dict(d, error = d['label'] + ' field is required') if (d['required'] and d['value'] == '') else d, data))
+    # Filter out valid fields
+    errorFields = list(filter(lambda f: f.get('error'), validated))
+    # Return error fields array or None if no errors
+    return errorFields if len(errorFields) else None
 
 # Listeners
 class Submit(unohelper.Base, XActionListener):
-
   def __init__(self, dialogObj, form):
     self.__dialogObj = dialogObj
     self.__form = form
-
   def actionPerformed(self, actionEvent): 
-    self.__form.Save(self.__dialogObj.Controls)
+    # Save form and close dialog if success
+    errors = self.__form.Save(self.__dialogObj)
+    if not errors: self.__dialogObj.endDialog(1)
 

@@ -20,12 +20,12 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   importlib.reload(sys.modules[name])   
 
 # Import classes    
-from Section import Section
+from Section import Section  
 from Sheet import Sheet
-from Cell import Cell
+from Cell import Cell 
 
 # Generate Sheet          
-SECTION = Section('Transactions', This())
+SECTION = Section('Transactions', This())          
 
 # App
 def blop(self): 

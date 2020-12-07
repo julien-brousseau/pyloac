@@ -89,5 +89,8 @@ class Section:
 
   #
   def AddNewLine(self, data):
-    msgbox('New Line!')
-    self.Error(data)
+    # msgbox('New Line!')
+    self.Error('new line')
+
+  def Fields(self):
+    return list(map(lambda col: col['field'], self.Model))
