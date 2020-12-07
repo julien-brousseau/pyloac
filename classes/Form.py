@@ -28,18 +28,20 @@ class Form:
     dialogModel.PositionX = 100
     dialogModel.PositionY = 100
     dialogModel.Width = 200
-    dialogModel.Height = 300
+    dialogModel.Height = 400
     dialogModel.Title = "Submit"
 
     # Fields
-    for index, model in enumerate(self.__section.Model):
+    for index, model in enumerate(filter(lambda m: not m['autovalue'], self.__section.Model)):
+    # for index, model in enumerate(self.__section.Model):
 
       # Convert types to UNO objects
       types = {
         'String': 'UnoControlEditModel',
         'Integer': 'UnoControlEditModel',
         'Date': 'UnoControlDateFieldModel',
-        'Amount': 'UnoControlCurrencyFieldModel',
+        'DateTime': 'UnoControlDateFieldModel',
+        'Amount': 'UnoControlNumericFieldModel',
         'CheckBox': 'UnoControlCheckBoxModel'
       }
       
@@ -69,15 +71,16 @@ class Form:
 
       # Type-dependant properties
       if model['type'] == 'Date':
-        d = self.__section.Today
+        dateStr = self.__section.Today
         field.Dropdown = True
         field.Spin = True
-        field.Date = Date(*d.split('-')[::-1])
-        field.Text = d
+        field.Date = Date(*map(lambda x: int(x), dateStr.split('-')[::-1]))
+        field.Text = dateStr
         field.DateFormat = 11
       elif model['type'] == 'Amount':
         field.Spin = True
         field.Value = 0
+        field.DecimalAccuracy = 2
       else:
         field.Text = model['default']
 
@@ -115,7 +118,7 @@ class Form:
   # Validate form and handle success/failure
   def Save(self, formDialog):
     # Allowed fields
-    columns = self.__section.Fields()
+    columns = self.__section.FieldNames()
     # Filter all allowed fields in dialog
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
     # Fetch array of values from dialog
@@ -128,7 +131,7 @@ class Form:
     for label in labels:
       label.Model.TextColor = 0x000000
 
-    # Validate fields and show errors
+    # Validate fields and return errors if any
     errors = self.__validateForm()
     if errors:
       # Change label color for error fields and show errors in log
@@ -138,7 +141,7 @@ class Form:
       # Return error to dialog
       return errors
     
-    # Add a new line
+    # Add a new line if validation passes
     self.__section.AddNewLine(self.Data)
     return False
   

@@ -3,7 +3,7 @@ from Sheet import Sheet
 from Cell import Cell 
 from Form import Form
 
-# Utilities
+# Utilities 
 from datetime import datetime
 
 # Debugging tools
@@ -91,13 +91,20 @@ class Section:
     form = Form(self)
     form.Open() 
 
-  #
+  # Write a new line in section Sheet with 
   def AddNewLine(self, data):
+    # msgbox(str(Cell('NextId', self.__dataSheet).value()))
     row = self.__sheet.NextEmptyRow()
-    for field in data:
+    meta = list(filter(lambda f: f['field'] in ['Id', 'User', 'TS'], self.Model))
+    meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
+    meta[1]['value'] = 'Blop'
+    meta[2]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
+    completeData = [*data, *meta]  
+    self.Error(completeData)
+    for field in completeData:
       coords = [field['column'] - 1, row - 1]
-      Cell(coords, self.__sheet).setValue(field['value'])
-      # self.Error('added: ' + str(cell))
+      Cell(coords, self.__sheet).setValue(field['value'], field['type'])
 
-  def Fields(self):
+  # Return a list of all Sections' field names
+  def FieldNames(self):
     return list(map(lambda col: col['field'], self.Model))
