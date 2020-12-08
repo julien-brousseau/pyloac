@@ -4,7 +4,10 @@ from Cell import Cell
 from Form import Form
 
 # Utilities 
+import uno
 from datetime import datetime
+from com.sun.star.beans import PropertyValue
+from com.sun.star.util import SortField
 
 # Debugging tools
 from apso_utils import xray, mri, msgbox 
@@ -19,6 +22,7 @@ from apso_utils import xray, mri, msgbox
 #     - 'Error'         => Error log for the section
 #     - 'FirstRow'      => First row of the list section in main sheet
 #     - 'DataFirstRow'  => First row of the Model in the data sheet
+#     - 'NextId'        => 
 
  
 class Section:
@@ -93,18 +97,40 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
-    # msgbox(str(Cell('NextId', self.__dataSheet).value()))
+    # Next row Id
     row = self.__sheet.NextEmptyRow()
+    # Id, User and TS
     meta = list(filter(lambda f: f['field'] in ['Id', 'User', 'TS'], self.Model))
     meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
     meta[1]['value'] = 'Blop'
     meta[2]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
     completeData = [*data, *meta]  
-    self.Error(completeData)
+    # Write fields
     for field in completeData:
       coords = [field['column'] - 1, row - 1]
       Cell(coords, self.__sheet).setValue(field['value'], field['type'])
+    # Sort rows
+    self.SortRange()
 
   # Return a list of all Sections' field names
   def FieldNames(self):
     return list(map(lambda col: col['field'], self.Model))
+
+  # Sorting Columns
+  def SortRange(self, col1 = 0, asc1 = False, col2 = 25, asc2 = False):
+    cellRange = self.__sheet.Range("A4:Z999")
+    sortFields = []
+    sortFields.append(NewSortField(col1, asc1))
+    # if col2:
+    #   sortFields.append(NewSortField(col2, asc2))
+    sortDesc = [PropertyValue()]
+    sortDesc[0].Name = "SortFields"
+    sortDesc[0].Value = uno.Any('[]com.sun.star.util.SortField', sortFields)
+    cellRange.sort(sortDesc)
+
+# >> Used in SortRange
+def NewSortField(col, asc):
+    field = SortField()
+    field.Field = col
+    field.SortAscending = asc
+    return field

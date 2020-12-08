@@ -56,8 +56,7 @@ class Cell:
       date = self.__dateStrToCalcDate(value)
       self.__range.Value = date
     elif _type == 'DateTime':
-      # date = self.__dateToCalcDate(value)
-      self.__range.String = datetime.datetime.now().strftime("%Y-%d-%m %H:%M:%S")
+      self.__range.String = value
     else: 
       self.__range.String = str(value)
     # if type(value) is str: self.__range.String = value
