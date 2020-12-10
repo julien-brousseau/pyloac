@@ -2,6 +2,10 @@
 from Sheet import Sheet 
 from Cell import Cell 
 from Form import Form
+from Utils import ColumnLabel
+
+# 
+from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
 # Utilities 
 import uno
@@ -127,6 +131,10 @@ class Section:
     sortDesc[0].Name = "SortFields"
     sortDesc[0].Value = uno.Any('[]com.sun.star.util.SortField', sortFields)
     cellRange.sort(sortDesc)
+
+  # Clear the data (non-header) content of the sheet
+  def ClearSheet(self):
+    self.__sheet.Range('A' + str(self.__firstRow + 1) + ':Z9999').clearContents(VALUE + DATETIME + STRING + FORMULA)
 
 # >> Used in SortRange
 def NewSortField(col, asc):

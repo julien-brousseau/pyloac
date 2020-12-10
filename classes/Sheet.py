@@ -12,8 +12,8 @@ class Sheet:
     self.Name = name
 
   # Returns the CellRange reference to the "range name" arg
-  def Range(self, range):
-    return self.Instance.getCellRangeByName(range) 
+  def Range(self, rng):
+    return self.Instance.getCellRangeByName(rng) 
 
   # Clear the contents of the cell range
   def Clear(self, range):
