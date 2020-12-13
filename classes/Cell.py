@@ -1,5 +1,5 @@
 # Utilities
-from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
+from Utils import ClearContent
 import datetime
 
 # Debugging tools
@@ -40,14 +40,12 @@ class Cell:
     delta = datetime.date(*map(lambda x: int(x), dateStr.split('-'))) - datetime.date(1899, 12, 30)
     date = float(delta.days) + (float(delta.seconds) / 86400)
     return date
-
   # def __dateToCalcDate(self, d):
     # blop = datetime.strptime( d, '%Y-%m-%d' )
     # msgbox(str(d))
     # date = float(delta.days) + (float(delta.seconds) / 86400)
     # return 1#date
  
-
   # Setters
   def setValue(self, value, _type = 'String'):
     if _type in ['Amount', 'Integer']:
@@ -61,6 +59,8 @@ class Cell:
       self.__range.String = str(value)
     # if type(value) is str: self.__range.String = value
     # self.__range.Value = value
+  def Clear(self):
+    ClearContent(self.__range)
 
   # Getters
   def value(self, decimal = False):
@@ -70,10 +70,6 @@ class Cell:
     else: return 'NOT IN RANGE: ' + self.__range.CellContentType.value
   def toString(self):
     return str(self.__range.String)
-
-  # Clear the contents of the cell
-  def Clear(self):
-    self.__range.clearContents(VALUE + DATETIME + STRING + FORMULA)
 
   # Helpers
   def __letter(self, offset = 0):

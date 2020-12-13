@@ -30,8 +30,8 @@ from Cell import Cell
 SECTION = Section('Transactions', This())
 
 # Test button     
-def blop(self):
-  SECTION.Clear()      
+def blop(self): 
+  # Sheet('TransactionsData', This()).Clear('A1:Z3')      
  
 # -------------------------------------------------------------------    
    

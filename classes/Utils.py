@@ -1,6 +1,9 @@
 # Math
 from math import floor
 
+# Cell values
+from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
+
 # Debugging tools
 from apso_utils import xray, mri, msgbox 
 
@@ -33,3 +36,8 @@ def ColumnLabel(col = None):
   l1 = chr(floor(col / 26) - 1 + 65)
   l2 = chr(col % 26 + 65)
   return l1 + l2
+
+#
+def ClearContent(rng):
+  rng.clearContents(VALUE + DATETIME + STRING + FORMULA)
+  return False

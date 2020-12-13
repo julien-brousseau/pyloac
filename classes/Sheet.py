@@ -1,5 +1,5 @@
 # Utilities
-from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
+from Utils import ClearContent
 
 # --------------------------------------------------------------------------------------------------------
 # Class SHEET
@@ -16,8 +16,8 @@ class Sheet:
     return self.Instance.getCellRangeByName(rng) 
 
   # Clear the contents of the cell range
-  def Clear(self, range):
-    self.Range(range).clearContents(VALUE + DATETIME + STRING + FORMULA)
+  def Clear(self, rng):
+    ClearContent(self.Range(rng))
 
   # Returns the number of the next empty row in the sheet
   def NextEmptyRow(self):

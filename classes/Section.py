@@ -26,7 +26,7 @@ from apso_utils import xray, mri, msgbox
 #     - 'Error'         => Error log for the section
 #     - 'FirstRow'      => First row of the list section in main sheet
 #     - 'DataFirstRow'  => First row of the Model in the data sheet
-#     - 'NextId'        => 
+#     - 'NextId'        => Automatic ID auto-increment (MAX() + 1 of transactions ids)
 
  
 class Section:
