@@ -33,11 +33,11 @@ class Form:
 
     # Fields
     for index, model in enumerate(filter(lambda m: not m['autovalue'], self.__section.Model)):
-    # for index, model in enumerate(self.__section.Model):
 
-      # Convert types to UNO objects
+      # Convert field type to UNO objects
       types = {
         'String': 'UnoControlEditModel',
+        'Enum': 'UnoControlListBoxModel',
         'Integer': 'UnoControlEditModel',
         'Date': 'UnoControlDateFieldModel',
         'DateTime': 'UnoControlDateFieldModel',
@@ -81,6 +81,12 @@ class Form:
         field.Spin = True
         field.Value = 0
         field.DecimalAccuracy = 2
+      elif model['type'] == 'Enum':
+        field.StringItemList = self.__section.ListFieldValues(model['field'])
+        field.Dropdown = True
+        # field.Spin = True
+        # field.Value = 0
+        # field.DecimalAccuracy = 2
       else:
         field.Text = model['default']
 

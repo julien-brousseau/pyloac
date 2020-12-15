@@ -5,7 +5,7 @@ import sys, os, glob, importlib
 from apso_utils import xray, mri, msgbox 
        
 # Reference to current document
-def This():
+def This(): 
   return XSCRIPTCONTEXT.getDocument()
    
 # Fetch scripts directory from Settings Sheet
@@ -22,20 +22,20 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 # Import classes 
 from Section import Section
 from Sheet import Sheet
-from Cell import Cell  
+from Cell import Cell     
   
 # -------------------------------------------------------------------   
-
+   
 # Generate Sheet
 SECTION = Section('Transactions', This())
 
-# Test button     
-def blop(self): 
-  # Sheet('TransactionsData', This()).Clear('A1:Z3')      
+# Test button  
+def blop(self):
+  OpenTransactionsForm(self)  
  
 # -------------------------------------------------------------------    
    
-# Button - Open transactions form
+# Button - Open transactions form 
 def OpenTransactionsForm(self): 
   SECTION.OpenForm()       
                  

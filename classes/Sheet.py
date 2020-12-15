@@ -1,3 +1,6 @@
+# Classes
+from Cell import Cell 
+
 # Utilities
 from Utils import ClearContent
 
@@ -24,3 +27,12 @@ class Sheet:
     cursor = self.Instance.createCursor()
     cursor.gotoEndOfUsedArea(True)
     return cursor.Rows.Count + 1
+
+  # Returns a list of all cells below a named range
+  def GetRangeAsList(self, rng):
+    a = []
+    c = Cell(rng, self)
+    while c.value():
+      a.append(c.value())
+      c.offset(0, 1)
+    return a[1:]

@@ -4,9 +4,6 @@ from Cell import Cell
 from Form import Form
 from Utils import ColumnLabel
 
-# 
-from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
-
 # Utilities 
 import uno
 from datetime import datetime
@@ -23,11 +20,11 @@ from apso_utils import xray, mri, msgbox
 #   - Sheet in the current document with the same name as constructor argument (ex: 'Transactions')
 #   - Sheet in the current document for section settings, named with appended "Data" (ex: 'TransactionsData')
 #     containing the following named cells:
-#     - 'Error'         => Error log for the section
-#     - 'FirstRow'      => First row of the list section in main sheet
-#     - 'DataFirstRow'  => First row of the Model in the data sheet
-#     - 'NextId'        => Automatic ID auto-increment (MAX() + 1 of transactions ids)
-
+#     - 'Error'           => Error log for the section
+#     - 'FirstRow'        => First row of the list section in main sheet
+#     - 'DataFirstRow'    => First row of the Model in the data sheet
+#     - 'NextId'          => Automatic ID auto-increment (MAX() + 1 of transactions ids)
+#     - 'AccountsColumn'  => Header of the accounts column, rows below contains account list
  
 class Section:
 
@@ -75,6 +72,11 @@ class Section:
   def refreshModel(self):
     self.Model = self.__ModelFromData()
 
+  # Returns possible values for a list field
+  # The field must have a named range ('Values_' + fieldName) as list header
+  def ListFieldValues(self, fieldName):
+    return self.__dataSheet.GetRangeAsList('Values_' + fieldName)
+
   # Clear and rebuild column headers for current section
   def BuildColumnHeaders(self):
     self.refreshModel()
@@ -101,6 +103,7 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
+    self.Error('blop')
     # Next row Id
     row = self.__sheet.NextEmptyRow()
     # Id, User and TS
@@ -134,7 +137,7 @@ class Section:
 
   # Clear the data (non-header) content of the sheet
   def ClearSheet(self):
-    self.__sheet.Range('A' + str(self.__firstRow + 1) + ':Z9999').clearContents(VALUE + DATETIME + STRING + FORMULA)
+    self.__sheet.Clear('A' + str(self.__firstRow + 1) + ':Z9999')
 
 # >> Used in SortRange
 def NewSortField(col, asc):
