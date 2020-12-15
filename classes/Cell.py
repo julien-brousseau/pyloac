@@ -66,8 +66,9 @@ class Cell:
 
   # Getters
   def value(self, decimal = False):
+
     if self.__range.CellContentType.value == 'TEXT': return self.__range.String
-    elif self.__range.CellContentType.value == 'VALUE': return '{0:.2f}'.format(self.__range.Value) if decimal else int(self.__range.Value)
+    elif self.__range.CellContentType.value == 'VALUE': return '{0:.2f}'.format(self.__range.Value) if decimal else self.__range.Value # int(self.__range.Value)
     elif self.__range.CellContentType.value == 'EMPTY': return None
     else: return 'NOT IN RANGE: ' + self.__range.CellContentType.value
   def toString(self):

@@ -18,23 +18,23 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   name = os.path.basename(src_file)[:-3]  
   importlib.import_module(name)  
   importlib.reload(sys.modules[name])   
-
+ 
 # Import classes 
 from Section import Section
-from Sheet import Sheet
+from Sheet import Sheet 
 from Cell import Cell     
-  
+    
 # -------------------------------------------------------------------   
-   
+    
 # Generate Sheet
 SECTION = Section('Transactions', This())
 
 # Test button  
-def blop(self):
-  OpenTransactionsForm(self)  
+def blop(self):  
+  OpenTransactionsForm(self)           
  
 # -------------------------------------------------------------------    
-   
+
 # Button - Open transactions form 
 def OpenTransactionsForm(self): 
   SECTION.OpenForm()       

@@ -68,7 +68,7 @@ class Form:
       field.Height = FIELD_HEIGHT
       field.Name = model['field']
       field.TabIndex = model['column']
-
+      
       # Type-dependant properties
       if model['type'] == 'Date':
         dateStr = self.__section.Today
@@ -79,14 +79,15 @@ class Form:
         field.DateFormat = 11
       elif model['type'] == 'Amount':
         field.Spin = True
-        field.Value = 0
+        field.Value = model['default']
         field.DecimalAccuracy = 2
       elif model['type'] == 'Enum':
-        field.StringItemList = self.__section.ListFieldValues(model['field'])
+        values = self.__section.ListFieldValues(model['field'])
+        if not model['required']:
+          values = [''] + values
+        field.StringItemList = values
         field.Dropdown = True
-        # field.Spin = True
-        # field.Value = 0
-        # field.DecimalAccuracy = 2
+        field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
       else:
         field.Text = model['default']
 
@@ -123,10 +124,12 @@ class Form:
   
   # Validate form and handle success/failure
   def Save(self, formDialog):
+    
     # Allowed fields
     columns = self.__section.FieldNames()
     # Filter all allowed fields in dialog
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
+    self.__section.Error(str(list(filteredControls)[2].Text))
     # Fetch array of values from dialog
     formValues = list(map(lambda c: c.Text, filteredControls))
     # Create a copy of the Section's Model and add form values 
@@ -136,7 +139,7 @@ class Form:
     labels = list(filter(lambda e: e.Model.Name[-5:] == 'Label', formDialog.Controls))
     for label in labels:
       label.Model.TextColor = 0x000000
-
+    
     # Validate fields and return errors if any
     errors = self.__validateForm()
     if errors:

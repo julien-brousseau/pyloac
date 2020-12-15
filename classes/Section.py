@@ -71,7 +71,7 @@ class Section:
   # Externally callable data refresh 
   def refreshModel(self):
     self.Model = self.__ModelFromData()
-
+ 
   # Returns possible values for a list field
   # The field must have a named range ('Values_' + fieldName) as list header
   def ListFieldValues(self, fieldName):
