@@ -37,8 +37,8 @@ class Section:
     self.__dataSheet = Sheet(self.Name + 'Data', self.__documentContext)
 
     # Custom settings from Data Sheet
-    self.__firstRow = Cell('FirstRow', self.__dataSheet).value()
-    self.__dataFirstRow = Cell('DataFirstRow', self.__dataSheet).value()
+    self.__firstRow = int(Cell('FirstRow', self.__dataSheet).value())
+    self.__dataFirstRow = int(Cell('DataFirstRow', self.__dataSheet).value())
 
     # Section data model
     self.Model = []
@@ -103,7 +103,7 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
-    self.Error('blop')
+    self.Error('data: ' + str(data))
     # Next row Id
     row = self.__sheet.NextEmptyRow()
     # Id, User and TS

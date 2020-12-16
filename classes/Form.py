@@ -27,9 +27,13 @@ class Form:
     dialogModel = smgr.createInstanceWithContext("com.sun.star.awt.UnoControlDialogModel", ctx)
     dialogModel.PositionX = 100
     dialogModel.PositionY = 100
-    dialogModel.Width = 200
-    dialogModel.Height = 400
+    dialogModel.Width = 400
+    dialogModel.Height = 250
     dialogModel.Title = "Submit"
+
+    # 
+    yOffset = 0
+    xOffset = 0
 
     # Fields
     for index, model in enumerate(filter(lambda m: not m['autovalue'], self.__section.Model)):
@@ -48,14 +52,16 @@ class Form:
       # Position variables
       FORM_PADDING = 10
       FIELD_SPACING = 5
-      FIELD_HEIGHT = 14
+      FIELD_HEIGHT = 15
       LABEL_HEIGHT = 10
+
+      _w = model['width'] * 15 
 
       # Field label
       label = dialogModel.createInstance("com.sun.star.awt.UnoControlFixedTextModel" )
-      label.PositionX = FORM_PADDING
-      label.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + ((index - 1) * LABEL_HEIGHT)
-      label.Width  = model['width'] * 15 
+      label.PositionX = FORM_PADDING + xOffset
+      label.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + ((index - 1) * LABEL_HEIGHT) + yOffset
+      label.Width  = _w
       label.Height = LABEL_HEIGHT
       label.Name = model['field'] + 'Label'
       label.Label = model['label']
@@ -77,7 +83,7 @@ class Form:
         field.Date = Date(*map(lambda x: int(x), dateStr.split('-')[::-1]))
         field.Text = dateStr
         field.DateFormat = 11
-      elif model['type'] == 'Amount':
+      elif model['type'] == 'Amount': 
         field.Spin = True
         field.Value = model['default']
         field.DecimalAccuracy = 2
@@ -85,6 +91,7 @@ class Form:
         values = self.__section.ListFieldValues(model['field'])
         if not model['required']:
           values = [''] + values
+        # field.LineCount = 10
         field.StringItemList = values
         field.Dropdown = True
         field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
@@ -124,23 +131,26 @@ class Form:
   
   # Validate form and handle success/failure
   def Save(self, formDialog):
+    # self.__section.Error('Saving...')
     
     # Allowed fields
     columns = self.__section.FieldNames()
     # Filter all allowed fields in dialog
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
-    self.__section.Error(str(list(filteredControls)[2].Text))
-    # Fetch array of values from dialog
-    formValues = list(map(lambda c: c.Text, filteredControls))
-    # Create a copy of the Section's Model and add form values 
+
+    # Fetch array of values from dialog fields
+    formValues = list(map(lambda c: c.SelectedItem if str(c).find('UnoListBoxControl') != -1 else c.Text, filteredControls))
+    # self.__section.Error(formValues)
+
+    # Create a copy of the Section's Model and merge with form values 
     self.Data = list(map(lambda model, value: dict(model, value = value), self.__section.Model, formValues))
     
-    # Reset label color
+    # Reset all labels colors
     labels = list(filter(lambda e: e.Model.Name[-5:] == 'Label', formDialog.Controls))
     for label in labels:
       label.Model.TextColor = 0x000000
     
-    # Validate fields and return errors if any
+    # Validate fields and manage errors
     errors = self.__validateForm()
     if errors:
       # Change label color for error fields and show errors in log

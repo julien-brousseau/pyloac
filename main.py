@@ -7,7 +7,7 @@ from apso_utils import xray, mri, msgbox
 # Reference to current document
 def This(): 
   return XSCRIPTCONTEXT.getDocument()
-   
+    
 # Fetch scripts directory from Settings Sheet
 SCRIPTS_DIRECTORY = This().Sheets['Settings'].getCellRangeByName('ScriptsDirectory').String
   
@@ -23,16 +23,16 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 from Section import Section
 from Sheet import Sheet 
 from Cell import Cell     
-    
+             
 # -------------------------------------------------------------------   
-    
+       
 # Generate Sheet
 SECTION = Section('Transactions', This())
-
+    
 # Test button  
 def blop(self):  
   OpenTransactionsForm(self)           
- 
+    
 # -------------------------------------------------------------------    
 
 # Button - Open transactions form 
@@ -49,4 +49,4 @@ def SaveTransactionsForm():
   SECTION.Error('SAVE!')      
 
  
-
+     
