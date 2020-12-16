@@ -22,45 +22,49 @@ class Form:
   def Open(self):
     
     # Dialog layout
+    # TODO: Make dialog width and height automatic 
     ctx = uno.getComponentContext()
     smgr = ctx.ServiceManager
     dialogModel = smgr.createInstanceWithContext("com.sun.star.awt.UnoControlDialogModel", ctx)
     dialogModel.PositionX = 100
     dialogModel.PositionY = 100
-    dialogModel.Width = 400
-    dialogModel.Height = 250
+    dialogModel.Width = 250
+    dialogModel.Height = 175
     dialogModel.Title = "Submit"
 
-    # 
+    # Convert field type to UNO objects
+    types = {
+      'String': 'UnoControlEditModel',
+      'Enum': 'UnoControlListBoxModel',
+      'Integer': 'UnoControlEditModel',
+      'Date': 'UnoControlDateFieldModel',
+      'DateTime': 'UnoControlDateFieldModel',
+      'Amount': 'UnoControlNumericFieldModel',
+      'CheckBox': 'UnoControlCheckBoxModel' }
+    
+    # Position variables
+    FORM_PADDING = 15
+    FIELD_SPACING = 10
+    FIELD_HEIGHT = 15
+    LABEL_HEIGHT = 10
     yOffset = 0
     xOffset = 0
+    currentSection = 1
 
-    # Fields
-    for index, model in enumerate(filter(lambda m: not m['autovalue'], self.__section.Model)):
+    # Build all fields except metadata
+    fields = filter(lambda m: not m['autovalue'], self.__section.Model)
+    for model in fields:
 
-      # Convert field type to UNO objects
-      types = {
-        'String': 'UnoControlEditModel',
-        'Enum': 'UnoControlListBoxModel',
-        'Integer': 'UnoControlEditModel',
-        'Date': 'UnoControlDateFieldModel',
-        'DateTime': 'UnoControlDateFieldModel',
-        'Amount': 'UnoControlNumericFieldModel',
-        'CheckBox': 'UnoControlCheckBoxModel'
-      }
-      
-      # Position variables
-      FORM_PADDING = 10
-      FIELD_SPACING = 5
-      FIELD_HEIGHT = 15
-      LABEL_HEIGHT = 10
-
+      if currentSection != model['section']: 
+        xOffset = 0
+        yOffset += (FIELD_HEIGHT + LABEL_HEIGHT + FIELD_SPACING)
+        currentSection = model['section']
       _w = model['width'] * 15 
 
       # Field label
       label = dialogModel.createInstance("com.sun.star.awt.UnoControlFixedTextModel" )
       label.PositionX = FORM_PADDING + xOffset
-      label.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + ((index - 1) * LABEL_HEIGHT) + yOffset
+      label.PositionY = FORM_PADDING + yOffset
       label.Width  = _w
       label.Height = LABEL_HEIGHT
       label.Name = model['field'] + 'Label'
@@ -68,13 +72,16 @@ class Form:
 
       # Field control
       field = dialogModel.createInstance("com.sun.star.awt." + types[model['type']] )
-      field.PositionX = FORM_PADDING
-      field.PositionY = FORM_PADDING + (index * (FIELD_HEIGHT + FIELD_SPACING) ) + (index * LABEL_HEIGHT)
-      field.Width  = model['width'] * 15 
+      field.PositionX = FORM_PADDING + xOffset
+      field.PositionY = FORM_PADDING + yOffset + LABEL_HEIGHT
+      field.Width  = _w
       field.Height = FIELD_HEIGHT
       field.Name = model['field']
       field.TabIndex = model['column']
-      
+
+      # 
+      xOffset += _w + FIELD_SPACING
+       
       # Type-dependant properties
       if model['type'] == 'Date':
         dateStr = self.__section.Today
@@ -96,21 +103,23 @@ class Form:
         field.Dropdown = True
         field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
       else:
-        field.Text = model['default']
-
+        field.Text = model['default'] or ''
+ 
       # Insert fields
       dialogModel.insertByName( model['field'] + 'Label', label)
       dialogModel.insertByName( model['field'], field)
 
     # Button
     button = dialogModel.createInstance("com.sun.star.awt.UnoControlButtonModel" )
-    button.PositionX = 100
-    button.PositionY  = 30
-    button.Width = 50
-    button.Height = 14
+    button.PositionX = FORM_PADDING
+    button.PositionY  = yOffset + 60
+    button.Width = 75
+    button.Height = 20
+    button.BackgroundColor = 0x4CA71B
+    button.TextColor = 0xFFFFFF
     button.Name = "Submit"
     button.TabIndex = 99 
-    button.Label = "Save"
+    button.Label = "Add"
     dialogModel.insertByName("Submit", button)
 
     # create the dialog control and set the model

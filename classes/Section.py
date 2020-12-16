@@ -76,7 +76,7 @@ class Section:
   # The field must have a named range ('Values_' + fieldName) as list header
   def ListFieldValues(self, fieldName):
     return self.__dataSheet.GetRangeAsList('Values_' + fieldName)
-
+ 
   # Clear and rebuild column headers for current section
   def BuildColumnHeaders(self):
     self.refreshModel()
@@ -138,6 +138,8 @@ class Section:
   # Clear the data (non-header) content of the sheet
   def ClearSheet(self):
     self.__sheet.Clear('A' + str(self.__firstRow + 1) + ':Z9999')
+    Cell('Error', self.__dataSheet).setValue('')
+    self.Error('Sheet reset')
 
 # >> Used in SortRange
 def NewSortField(col, asc):
