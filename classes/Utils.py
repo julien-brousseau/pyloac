@@ -1,11 +1,16 @@
 # Math
 from math import floor
 
+# Date
+from datetime import datetime, timedelta
+
 # Cell values
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
 # Debugging tools
 from apso_utils import xray, mri, msgbox 
+
+
 
 # Return the array index of a capital letter (with ASCII offset)
 def ColumnIndex(letter = None):
@@ -37,7 +42,11 @@ def ColumnLabel(col = None):
   l2 = chr(col % 26 + 65)
   return l1 + l2
 
-#
+# Remove all contents from the specified cell range
 def ClearContent(rng):
   rng.clearContents(VALUE + DATETIME + STRING + FORMULA)
   return False
+
+# Returns the standard string format (YYYY-MM-DD) from a LibreOffice date format (integer)
+def LODateToString(loDate):
+  return (datetime.strptime( "1900", '%Y' ) + timedelta(days = int(loDate) - 2)).strftime("%Y-%m-%d")

@@ -1,5 +1,5 @@
 # Module management
-import sys, os, glob, importlib   
+import sys, os, glob, importlib 
 
 # Debugging tools 
 from apso_utils import xray, mri, msgbox 
@@ -22,17 +22,23 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 # Import classes 
 from Section import Section
 from Sheet import Sheet 
-from Cell import Cell          
+from Cell import Cell 
+from Utils import LODateToString   
                
 # -------------------------------------------------------------------   
        
+# Returns the coordinates of currently selected cell
+def CurrentSelection(celladdress = False):
+  selection = This().CurrentSelection.CellAddress
+  return [selection.Column, selection.Row]
+
 # Generate Sheet
 SECTION = Section('Transactions', This())      
          
 # Test button  
-def blop(self):  
-  OpenTransactionsForm(self)           
-        
+def blop(self):
+  pass
+
 # -------------------------------------------------------------------    
 
 # Button - Open transactions form 
@@ -48,5 +54,37 @@ def GenerateTransactionsSheet(self):
 def SaveTransactionsForm():
   SECTION.Error('SAVE!')      
 
- 
+# Planification - Record the currently selected planned transaction into Transactions sheet
+# and flags it as recorded by prepending an underscore, preventing it from being calculated
+# as an active transaction in Soldes sheet
+def SaveCellAsTransaction(self):
+  sheet = Sheet('Planification', This())
+
+  # This character is appended when a cell is saved as transaction
+  ignoreFirstCharacter = '_'
+
+  # Fetch selected cell
+  cell = Cell(CurrentSelection(), sheet)
+  cellContent = cell.value()
+
+  # Ignore empty cells and already copied data
+  if not cellContent or str(cellContent)[0] == ignoreFirstCharacter:
+      msgbox("Invalid selection")
+      return None
+
+  # Add an underscore to the cell value to prevent it from being calculated in Soldes
+  cell.setValue(ignoreFirstCharacter + str(cellContent))
+
+  # Fetch fields and values from header and merge them in dict as field:value
+  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 7)))
+  fields = sheet.GetRangeAsList('A1', 7)
+  fields = dict(list(map(lambda f: (f, values.pop(0)), fields)))
+
+  # Set correct date instead of day
+  fields['Date'] = LODateToString(Cell('A' + str(cell.coords()[1] + 1), sheet).value())
+  
+  # Map values to section model, then save as new transaction
+  model = list(filter(lambda f: not f['autovalue'], SECTION.Model))
+  data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
+  SECTION.AddNewLine(data)
      

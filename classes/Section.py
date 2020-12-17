@@ -103,21 +103,25 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
-    self.Error('data: ' + str(data))
-    # Next row Id
+
+    # Next row index
     row = self.__sheet.NextEmptyRow()
-    # Id, User and TS
+
+    # Metadata - Id, User and TS
     meta = list(filter(lambda f: f['field'] in ['Id', 'User', 'TS'], self.Model))
     meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
-    meta[1]['value'] = 'Blop'
+    meta[1]['value'] = 'User 1'
     meta[2]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
-    completeData = [*data, *meta]  
+    completeData = [*data, *meta]
+
     # Write fields
     for field in completeData:
       coords = [field['column'] - 1, row - 1]
       Cell(coords, self.__sheet).setValue(field['value'], field['type'])
+    
     # Sort rows
     self.SortRange()
+    self.Error('New row added: ' + str(data))
 
   # Return a list of all Sections' field names
   def FieldNames(self):

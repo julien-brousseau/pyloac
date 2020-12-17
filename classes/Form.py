@@ -11,6 +11,7 @@ from apso_utils import xray, mri, msgbox
  
 # --------------------------------------------------------------------------------------------------------
 # Class FORM
+# Section sub-wrapper for dialogs and fields management
  
 class Form:
 
@@ -140,16 +141,12 @@ class Form:
   
   # Validate form and handle success/failure
   def Save(self, formDialog):
-    # self.__section.Error('Saving...')
-    
-    # Allowed fields
-    columns = self.__section.FieldNames()
     # Filter all allowed fields in dialog
+    columns = self.__section.FieldNames()
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
 
     # Fetch array of values from dialog fields
     formValues = list(map(lambda c: c.SelectedItem if str(c).find('UnoListBoxControl') != -1 else c.Text, filteredControls))
-    # self.__section.Error(formValues)
 
     # Create a copy of the Section's Model and merge with form values 
     self.Data = list(map(lambda model, value: dict(model, value = value), self.__section.Model, formValues))

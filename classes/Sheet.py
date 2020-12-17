@@ -28,11 +28,26 @@ class Sheet:
     cursor.gotoEndOfUsedArea(True)
     return cursor.Rows.Count + 1
 
-  # Returns a list of all cells below a named range
-  def GetRangeAsList(self, rng):
-    a = []
-    c = Cell(rng, self)
-    while c.value():
-      a.append(c.value())
+  # Returns a list of all cells below a named range (breaks at first empty row)
+  def GetRangeAsList(self, firstRowRangeName, maxLength = None):
+    values = []
+    index = 0
+    c = Cell(firstRowRangeName, self).offset(0, 1)
+    while (not maxLength and c.value()) or (maxLength and index < maxLength):
+      # if maxLength and index >= maxLength: break
+      values.append(c.value())
       c.offset(0, 1)
-    return a[1:]
+      index += 1
+    return values 
+
+  # Returns a list of all cells below a named range (breaks at first empty row)
+  # def GetRangeAsList(self, firstRowRangeName, maxLength = None):
+  #   values = []
+  #   index = 0
+  #   c = Cell(firstRowRangeName, self).offset(0, 1)
+  #   while c.value():
+  #     if maxLength and index >= maxLength: break
+  #     values.append(c.value())
+  #     c.offset(0, 1)
+  #     index += 1
+  #   return values 
