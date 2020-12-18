@@ -19,6 +19,15 @@ class Form:
     self.__section = section
     self.Data = None
 
+  # Returns a field value depending its type
+  def __getFieldValue(self, field):
+    if str(field).find('UnoListBoxControl') != -1:
+      return field.SelectedItem 
+    elif str(field).find('UnoCheckBoxControl') != -1:
+      return field.State or ''
+    else: 
+      return field.Text
+  
   # Show form dialog based on section's model
   def Open(self):
     
@@ -85,24 +94,26 @@ class Form:
        
       # Type-dependant properties
       if model['type'] == 'Date':
-        dateStr = self.__section.Today
         field.Dropdown = True
         field.Spin = True
+        field.DateFormat = 11
+        dateStr = self.__section.Today
         field.Date = Date(*map(lambda x: int(x), dateStr.split('-')[::-1]))
         field.Text = dateStr
-        field.DateFormat = 11
       elif model['type'] == 'Amount': 
         field.Spin = True
-        field.Value = model['default']
         field.DecimalAccuracy = 2
+        field.Value = model['default']
       elif model['type'] == 'Enum':
+        field.LineCount = 10
+        field.Dropdown = True
         values = self.__section.ListFieldValues(model['field'])
         if not model['required']:
           values = [''] + values
-        field.LineCount = 10
         field.StringItemList = values
-        field.Dropdown = True
         field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
+      elif model['type'] == 'CheckBox':
+        field.State = model['default'] or 0
       else:
         field.Text = model['default'] or ''
  
@@ -138,7 +149,7 @@ class Form:
     # execute it
     DialogObj.execute()
     DialogObj.dispose()
-  
+
   # Validate form and handle success/failure
   def Save(self, formDialog):
 
@@ -147,7 +158,7 @@ class Form:
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
 
     # Fetch array of values from dialog fields
-    formValues = list(map(lambda c: c.SelectedItem if str(c).find('UnoListBoxControl') != -1 else c.Text, filteredControls))
+    formValues = list(map(lambda c: self.__getFieldValue(c), filteredControls))
 
     # Create a copy of the Section's Model (with autovalue fields filtered out) and merge with form values 
     model = filter(lambda f: not f['autovalue'] , self.__section.Model)

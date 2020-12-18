@@ -37,9 +37,6 @@ def blop(self):
   # section = Section('Transactions', This())
   # sheet = Sheet('Planification', This())
   # sheet.ToggleVisibleRows('A2:A11')
-
-  # ?? User is not working
-
   pass 
 
 # -------------------------------------------------------------------

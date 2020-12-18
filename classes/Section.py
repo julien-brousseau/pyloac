@@ -20,11 +20,10 @@ from apso_utils import xray, mri, msgbox
 #   - Sheet in the current document with the same name as constructor argument (ex: 'Transactions')
 #   - Sheet in the current document for section settings, named with appended "Data" (ex: 'TransactionsData')
 #     containing the following named cells:
-#     - 'Error'           => Error log for the section
+#     - 'Error'           => Error log for the section (preferably multiline merged cells)
 #     - 'FirstRow'        => First row of the list section in main sheet
 #     - 'DataFirstRow'    => First row of the Model in the data sheet
 #     - 'NextId'          => Automatic ID auto-increment (MAX() + 1 of transactions ids)
-#     - 'AccountsColumn'  => Header of the accounts column, rows below contains account list
  
 class Section:
 
@@ -102,15 +101,15 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
- 
-    # Next row index
-    row = self.__sheet.NextEmptyRow()
 
-    # Metadata - Id and Timestamp
+    # Metadata - Id and Timestamp (autovalue)
     meta = list(filter(lambda f: f['field'] in ['Id', 'TS'], self.Model))
     meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
     meta[1]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
     completeData = [*data, *meta]
+
+    # Next row index
+    row = self.__sheet.NextEmptyRow()
 
     # Write fields
     for field in completeData:
@@ -119,7 +118,7 @@ class Section:
     
     # Sort rows
     self.SortRange()
-    self.Error('New row added: ' + str(data))
+    # self.Error('New row added: ' + str(data))
  
   # Return a list of all Sections' field names
   def FieldNames(self):
