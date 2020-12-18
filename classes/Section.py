@@ -3,7 +3,7 @@ from Sheet import Sheet
 from Cell import Cell 
 from Form import Form
 from Utils import ColumnLabel
-
+ 
 # Utilities 
 import uno
 from datetime import datetime
@@ -65,7 +65,6 @@ class Section:
         cell.offset(1, 0) 
       arr.append(r)
       cell.offset(len(headers) * -1, 1)
-    # msgbox(str(arr))
     return arr
   
   # Externally callable data refresh 
@@ -103,15 +102,14 @@ class Section:
 
   # Write a new line in section Sheet with 
   def AddNewLine(self, data):
-
+ 
     # Next row index
     row = self.__sheet.NextEmptyRow()
 
-    # Metadata - Id, User and TS
-    meta = list(filter(lambda f: f['field'] in ['Id', 'User', 'TS'], self.Model))
+    # Metadata - Id and Timestamp
+    meta = list(filter(lambda f: f['field'] in ['Id', 'TS'], self.Model))
     meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
-    meta[1]['value'] = 'User 1'
-    meta[2]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
+    meta[1]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
     completeData = [*data, *meta]
 
     # Write fields
@@ -122,7 +120,7 @@ class Section:
     # Sort rows
     self.SortRange()
     self.Error('New row added: ' + str(data))
-
+ 
   # Return a list of all Sections' field names
   def FieldNames(self):
     return list(map(lambda col: col['field'], self.Model))

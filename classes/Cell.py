@@ -8,7 +8,7 @@ from apso_utils import xray, mri, msgbox
 # --------------------------------------------------------------------------------------------------------
 # Class CELL
 # Interface allowing more control over a cell reference
-
+ 
 class Cell:
 
   # The address parameter can be either [x, y] or 'range'

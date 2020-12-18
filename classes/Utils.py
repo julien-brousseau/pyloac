@@ -10,7 +10,7 @@ from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 # Debugging tools
 from apso_utils import xray, mri, msgbox 
 
-
+ 
 
 # Return the array index of a capital letter (with ASCII offset)
 def ColumnIndex(letter = None):

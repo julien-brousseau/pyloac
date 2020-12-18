@@ -1,6 +1,6 @@
 # Utilities
 from com.sun.star.util import Date
-
+ 
 # Dialog control
 import uno
 import unohelper
@@ -12,7 +12,7 @@ from apso_utils import xray, mri, msgbox
 # --------------------------------------------------------------------------------------------------------
 # Class FORM
 # Section sub-wrapper for dialogs and fields management
- 
+
 class Form:
 
   def __init__(self, section):
@@ -30,7 +30,7 @@ class Form:
     dialogModel.PositionX = 100
     dialogModel.PositionY = 100
     dialogModel.Width = 250
-    dialogModel.Height = 175
+    dialogModel.Height = 225
     dialogModel.Title = "Submit"
 
     # Convert field type to UNO objects
@@ -99,7 +99,7 @@ class Form:
         values = self.__section.ListFieldValues(model['field'])
         if not model['required']:
           values = [''] + values
-        # field.LineCount = 10
+        field.LineCount = 10
         field.StringItemList = values
         field.Dropdown = True
         field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
@@ -141,6 +141,7 @@ class Form:
   
   # Validate form and handle success/failure
   def Save(self, formDialog):
+
     # Filter all allowed fields in dialog
     columns = self.__section.FieldNames()
     filteredControls = filter(lambda c: c.Model.Name in columns, formDialog.Controls)
@@ -148,8 +149,9 @@ class Form:
     # Fetch array of values from dialog fields
     formValues = list(map(lambda c: c.SelectedItem if str(c).find('UnoListBoxControl') != -1 else c.Text, filteredControls))
 
-    # Create a copy of the Section's Model and merge with form values 
-    self.Data = list(map(lambda model, value: dict(model, value = value), self.__section.Model, formValues))
+    # Create a copy of the Section's Model (with autovalue fields filtered out) and merge with form values 
+    model = filter(lambda f: not f['autovalue'] , self.__section.Model)
+    self.Data = list(map(lambda model, value: dict(model, value = value), model, formValues))
     
     # Reset all labels colors
     labels = list(filter(lambda e: e.Model.Name[-5:] == 'Label', formDialog.Controls))
@@ -172,13 +174,17 @@ class Form:
   
   # Validate fields against their required property
   def __validateForm(self):
+
     # Filter out metadata fields
-    ignoreFields = ['Id', 'User', 'TS']
+    ignoreFields = ['Id', 'TS']
     data = list(filter(lambda f: f['field'] not in ignoreFields, self.Data))
+
     # Validate each remaining field
     validated = list(map(lambda d: dict(d, error = d['label'] + ' field is required') if (d['required'] and d['value'] == '') else d, data))
+
     # Filter out valid fields
     errorFields = list(filter(lambda f: f.get('error'), validated))
+
     # Return error fields array or None if no errors
     return errorFields if len(errorFields) else None
 

@@ -28,26 +28,20 @@ class Sheet:
     cursor.gotoEndOfUsedArea(True)
     return cursor.Rows.Count + 1
 
-  # Returns a list of all cells below a named range (breaks at first empty row)
+  # Returns a list of all cells below a named range, breaks at first empty row or at maxLength
   def GetRangeAsList(self, firstRowRangeName, maxLength = None):
     values = []
     index = 0
     c = Cell(firstRowRangeName, self).offset(0, 1)
     while (not maxLength and c.value()) or (maxLength and index < maxLength):
-      # if maxLength and index >= maxLength: break
       values.append(c.value())
       c.offset(0, 1)
       index += 1
     return values 
 
-  # Returns a list of all cells below a named range (breaks at first empty row)
-  # def GetRangeAsList(self, firstRowRangeName, maxLength = None):
-  #   values = []
-  #   index = 0
-  #   c = Cell(firstRowRangeName, self).offset(0, 1)
-  #   while c.value():
-  #     if maxLength and index >= maxLength: break
-  #     values.append(c.value())
-  #     c.offset(0, 1)
-  #     index += 1
-  #   return values 
+# 
+  def ToggleVisibleRows(self, rangeName):
+    rng = self.Range(rangeName).getRows()
+    rng.IsVisible = not rng.IsVisible
+    # This().getCurrentController().setFirstVisibleColumn(0)
+    return None

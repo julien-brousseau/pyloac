@@ -3,11 +3,11 @@ import sys, os, glob, importlib
 
 # Debugging tools 
 from apso_utils import xray, mri, msgbox 
-              
+
 # Reference to current document
 def This(): 
   return XSCRIPTCONTEXT.getDocument()
-    
+
 # Fetch scripts directory from Settings Sheet
 SCRIPTS_DIRECTORY = This().Sheets['Settings'].getCellRangeByName('ScriptsDirectory').String
   
@@ -18,46 +18,48 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   name = os.path.basename(src_file)[:-3]  
   importlib.import_module(name)  
   importlib.reload(sys.modules[name])   
- 
+  
 # Import classes 
 from Section import Section
 from Sheet import Sheet 
 from Cell import Cell 
-from Utils import LODateToString   
-               
-# -------------------------------------------------------------------   
-       
+from Utils import LODateToString 
+
+# -------------------------------------------------------------------
+  
 # Returns the coordinates of currently selected cell
 def CurrentSelection(celladdress = False):
   selection = This().CurrentSelection.CellAddress
   return [selection.Column, selection.Row]
 
-# Generate Sheet
-SECTION = Section('Transactions', This())      
-         
-# Test button  
+# Test button
 def blop(self):
-  pass
+  # section = Section('Transactions', This())
+  # sheet = Sheet('Planification', This())
+  # sheet.ToggleVisibleRows('A2:A11')
 
-# -------------------------------------------------------------------    
+  # ?? User is not working
 
-# Button - Open transactions form 
+  pass 
+
+# -------------------------------------------------------------------
+    
+# Button - Open New transaction form dialog
 def OpenTransactionsForm(self): 
-  SECTION.OpenForm()       
-                 
+  section = Section('Transactions', This())  
+  section.OpenForm()       
+
 # Button - Generate transactions sheet (column headers, etc)
 def GenerateTransactionsSheet(self):
-  SECTION.ClearSheet()
-  SECTION.BuildColumnHeaders()
-  
-# Button - Save transactions form as new line
-def SaveTransactionsForm():
-  SECTION.Error('SAVE!')      
+  section = Section('Transactions', This())  
+  section.ClearSheet()
+  section.BuildColumnHeaders()
 
 # Planification - Record the currently selected planned transaction into Transactions sheet
 # and flags it as recorded by prepending an underscore, preventing it from being calculated
 # as an active transaction in Soldes sheet
 def SaveCellAsTransaction(self):
+  section = Section('Transactions', This())
   sheet = Sheet('Planification', This())
 
   # This character is appended when a cell is saved as transaction
@@ -84,7 +86,11 @@ def SaveCellAsTransaction(self):
   fields['Date'] = LODateToString(Cell('A' + str(cell.coords()[1] + 1), sheet).value())
   
   # Map values to section model, then save as new transaction
-  model = list(filter(lambda f: not f['autovalue'], SECTION.Model))
+  model = list(filter(lambda f: not f['autovalue'], section.Model))
   data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
-  SECTION.AddNewLine(data)
+  section.AddNewLine(data)
      
+#
+def TogglePlanificationHeaders(self):
+  sheet = Sheet('Planification', This())
+  sheet.ToggleVisibleRows('A2:A11')
