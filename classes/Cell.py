@@ -12,8 +12,8 @@ from apso_utils import xray, mri, msgbox
 class Cell:
 
   # The address parameter can be either [x, y] or 'range'
-  # The sheet parameter is a Sheet object
-  def __init__(self, address, sheet):
+  # The sheet parameter is a Sheet object 
+  def __init__(self, address, sheet): 
     self.__sheet = sheet.Instance
     self.__range = self.__sheet.getCellByPosition(address[0], address[1]) if type(address) == list else self.__sheet.getCellRangeByName(address)
 

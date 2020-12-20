@@ -9,10 +9,10 @@ import uno
 from datetime import datetime
 from com.sun.star.beans import PropertyValue
 from com.sun.star.util import SortField
-
+   
 # Debugging tools
 from apso_utils import xray, mri, msgbox 
- 
+  
 # --------------------------------------------------------------------------------------------------------
 # Class SECTION
 # Wrapper for document context and associated data sheet
@@ -26,28 +26,32 @@ from apso_utils import xray, mri, msgbox
 #     - 'NextId'          => Automatic ID auto-increment (MAX() + 1 of transactions ids)
  
 class Section:
-
+ 
   def __init__(self, name, documentContext):
-    self.Name = name
+    self.Name = name 
     self.__documentContext = documentContext
-
+ 
     # Associated Sheets
-    self.__sheet = Sheet(self.Name, self.__documentContext)
+    self.Sheet = Sheet(self.Name, self.__documentContext)
     self.__dataSheet = Sheet(self.Name + 'Data', self.__documentContext)
 
     # Custom settings from Data Sheet
-    self.__firstRow = int(Cell('FirstRow', self.__dataSheet).value())
+    self.FirstRow = int(Cell('FirstRow', self.__dataSheet).value())
     self.__dataFirstRow = int(Cell('DataFirstRow', self.__dataSheet).value())
 
     # Section data model
     self.Model = []
-    self.refreshModel()
-    self.__columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Model)]
+    self.RefreshModel()
+    self.Columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Model)]
 
     self.Today = Cell('Today', Sheet('Settings', self.__documentContext)).toString()
-      
+     
+  # Reference of form object in the main sheet
+  def Form(self):  
+    return self.Sheet.Form()
+ 
   # Fetch column info on the current section Data Sheet
-  def __ModelFromData(self):
+  def RefreshModel(self):
     # Fetch column headers
     headers = []
     cell = Cell([0, self.__dataFirstRow - 2], self.__dataSheet)
@@ -64,11 +68,7 @@ class Section:
         cell.offset(1, 0) 
       arr.append(r)
       cell.offset(len(headers) * -1, 1)
-    return arr
-  
-  # Externally callable data refresh 
-  def refreshModel(self):
-    self.Model = self.__ModelFromData()
+    self.Model = arr
  
   # Returns possible values for a list field
   # The field must have a named range ('Values_' + fieldName) as list header
@@ -77,11 +77,11 @@ class Section:
  
   # Clear and rebuild column headers for current section
   def BuildColumnHeaders(self):
-    self.refreshModel()
-    row = self.__firstRow
-    self.__sheet.Clear(f"A{row}:Z{row}")
-    cell = Cell([0, row - 1], self.__sheet)
-    for column in self.__columns:
+    self.RefreshModel()
+    row = self.FirstRow
+    self.Sheet.Clear(f"A{row}:Z{row}")
+    cell = Cell([0, row - 1], self.Sheet)
+    for column in self.Columns:
       cell.move(column['index'] - 1)
       cell.setValue(column['label'].upper())
 
@@ -109,12 +109,12 @@ class Section:
     completeData = [*data, *meta]
 
     # Next row index
-    row = self.__sheet.NextEmptyRow()
+    row = self.Sheet.NextEmptyRow()
 
     # Write fields
     for field in completeData:
       coords = [field['column'] - 1, row - 1]
-      Cell(coords, self.__sheet).setValue(field['value'], field['type'])
+      Cell(coords, self.Sheet).setValue(field['value'], field['type'])
     
     # Sort rows
     self.SortRange()
@@ -126,7 +126,7 @@ class Section:
 
   # Sorting Columns
   def SortRange(self, col1 = 0, asc1 = False, col2 = 25, asc2 = False):
-    cellRange = self.__sheet.Range("A4:Z999")
+    cellRange = self.Sheet.Range("A4:Z999")
     sortFields = []
     sortFields.append(NewSortField(col1, asc1))
     # if col2:
@@ -138,7 +138,7 @@ class Section:
 
   # Clear the data (non-header) content of the sheet
   def ClearSheet(self):
-    self.__sheet.Clear('A' + str(self.__firstRow + 1) + ':Z9999')
+    self.Sheet.Clear('A' + str(self.FirstRow + 1) + ':Z9999')
     Cell('Error', self.__dataSheet).setValue('')
     self.Error('Sheet reset')
 

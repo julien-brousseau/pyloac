@@ -3,7 +3,7 @@ import sys, os, glob, importlib
 
 # Debugging tools 
 from apso_utils import xray, mri, msgbox 
-
+ 
 # Reference to current document
 def This(): 
   return XSCRIPTCONTEXT.getDocument()
@@ -24,7 +24,7 @@ from Section import Section
 from Sheet import Sheet 
 from Cell import Cell 
 from Utils import LODateToString 
-
+ 
 # -------------------------------------------------------------------
   
 # Returns the coordinates of currently selected cell
@@ -32,20 +32,31 @@ def CurrentSelection(celladdress = False):
   selection = This().CurrentSelection.CellAddress
   return [selection.Column, selection.Row]
 
-# Test button
+# Test button 
 def blop(self):
-  # section = Section('Transactions', This())
-  # sheet = Sheet('Planification', This())
-  # sheet.ToggleVisibleRows('A2:A11')
-  pass 
-
+  return 0
+    
 # -------------------------------------------------------------------
     
+# Filter sheet by transaction type
+def ApplyFilter(self):
+  field = 'Type'
+  section = Section('Transactions', This())
+  columnIndex = [*filter(lambda f: f['label'] == field, section.Columns)][0]['index']
+  value = section.Form().getByName('FldFilter').SelectedValue
+  section.Sheet.Filter(section.FirstRow + 1, columnIndex - 1, value)
+        
+# Make all rows visible and reset 
+def ClearFilters(self):
+  section = Section('Transactions', This())
+  section.Sheet.ToggleVisibleRows()
+  section.Form().getByName('FldFilter').SelectedValue = ''
+ 
 # Button - Open New transaction form dialog
 def OpenTransactionsForm(self): 
   section = Section('Transactions', This())  
   section.OpenForm()       
-
+ 
 # Button - Generate transactions sheet (column headers, etc)
 def GenerateTransactionsSheet(self):
   section = Section('Transactions', This())  
@@ -66,8 +77,8 @@ def SaveCellAsTransaction(self):
   cell = Cell(CurrentSelection(), sheet)
   cellContent = cell.value()
 
-  # Ignore empty cells and already copied data
-  if not cellContent or str(cellContent)[0] == ignoreFirstCharacter:
+  # Ignore 1. Empty cells / 2. Cells containing already copied data / 3. Cells out of range (date column and headers)
+  if not cellContent or str(cellContent)[0] == ignoreFirstCharacter or cell.coords()[0] < 1 or cell.coords()[1] < 13:
       msgbox("Invalid selection")
       return None
 
@@ -87,7 +98,14 @@ def SaveCellAsTransaction(self):
   data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
   section.AddNewLine(data)
      
-#
+# Show/hide transaction details header in Planification
 def TogglePlanificationHeaders(self):
   sheet = Sheet('Planification', This())
-  sheet.ToggleVisibleRows('A2:A11')
+  visible = sheet.Range('A2').getRows()
+  sheet.ToggleVisibleRows('A2:A11', not visible)
+
+# Auto-refresh values for filter fields based on section data (called on field focus)
+def RefreshFilterValues(self):
+  section = Section('Transactions', This())  
+  values = section.ListFieldValues('Type')
+  section.Form().getByName("FldFilter").StringItemList = values

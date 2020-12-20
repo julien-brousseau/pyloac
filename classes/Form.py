@@ -35,12 +35,12 @@ class Form:
     # TODO: Make dialog width and height automatic 
     ctx = uno.getComponentContext()
     smgr = ctx.ServiceManager
-    dialogModel = smgr.createInstanceWithContext("com.sun.star.awt.UnoControlDialogModel", ctx)
+    dialogModel = smgr.createInstanceWithContext('com.sun.star.awt.UnoControlDialogModel', ctx)
     dialogModel.PositionX = 100
     dialogModel.PositionY = 100
     dialogModel.Width = 250
     dialogModel.Height = 225
-    dialogModel.Title = "Submit"
+    dialogModel.Title = 'New ' + self.__section.Name
 
     # Convert field type to UNO objects
     types = {
@@ -65,14 +65,17 @@ class Form:
     fields = filter(lambda m: not m['autovalue'], self.__section.Model)
     for model in fields:
 
+      # Field position based on section property
       if currentSection != model['section']: 
         xOffset = 0
         yOffset += (FIELD_HEIGHT + LABEL_HEIGHT + FIELD_SPACING)
         currentSection = model['section']
+
+      # Field width
       _w = model['width'] * 15 
 
       # Field label
-      label = dialogModel.createInstance("com.sun.star.awt.UnoControlFixedTextModel" )
+      label = dialogModel.createInstance('com.sun.star.awt.UnoControlFixedTextModel' )
       label.PositionX = FORM_PADDING + xOffset
       label.PositionY = FORM_PADDING + yOffset
       label.Width  = _w
@@ -81,7 +84,7 @@ class Form:
       label.Label = model['label']
 
       # Field control
-      field = dialogModel.createInstance("com.sun.star.awt." + types[model['type']] )
+      field = dialogModel.createInstance('com.sun.star.awt.' + types[model['type']] )
       field.PositionX = FORM_PADDING + xOffset
       field.PositionY = FORM_PADDING + yOffset + LABEL_HEIGHT
       field.Width  = _w
@@ -89,7 +92,7 @@ class Form:
       field.Name = model['field']
       field.TabIndex = model['column']
 
-      # 
+      # Dynamic horizontal position based on field width
       xOffset += _w + FIELD_SPACING
        
       # Type-dependant properties
@@ -113,40 +116,41 @@ class Form:
         field.StringItemList = values
         field.SelectedItems = [values.index(model['default'])] if model['default'] else [0]
       elif model['type'] == 'CheckBox':
+        # field.Label = 'Blop'
         field.State = model['default'] or 0
       else:
         field.Text = model['default'] or ''
  
-      # Insert fields
+      # Insert field in dialog
       dialogModel.insertByName( model['field'] + 'Label', label)
       dialogModel.insertByName( model['field'], field)
 
-    # Button
-    button = dialogModel.createInstance("com.sun.star.awt.UnoControlButtonModel" )
+    # Save button
+    button = dialogModel.createInstance('com.sun.star.awt.UnoControlButtonModel')
     button.PositionX = FORM_PADDING
     button.PositionY  = yOffset + 60
     button.Width = 75
     button.Height = 20
     button.BackgroundColor = 0x4CA71B
     button.TextColor = 0xFFFFFF
-    button.Name = "Submit"
+    button.Name = 'Submit'
     button.TabIndex = 99 
-    button.Label = "Add"
-    dialogModel.insertByName("Submit", button)
+    button.Label = 'Submit'
+    dialogModel.insertByName('Submit', button)
 
-    # create the dialog control and set the model
-    DialogObj = smgr.createInstanceWithContext("com.sun.star.awt.UnoControlDialog", ctx)
+    # Create the dialog control and set the model
+    DialogObj = smgr.createInstanceWithContext('com.sun.star.awt.UnoControlDialog', ctx)
     DialogObj.setModel(dialogModel)
 
-    # add the action listener
-    DialogObj.getControl("Submit").addActionListener(Submit(DialogObj, self))
+    # Add the action listener to button
+    DialogObj.getControl('Submit').addActionListener(Submit(DialogObj, self))
 
-    # create a peer ??
-    toolkit = smgr.createInstanceWithContext("com.sun.star.awt.ExtToolkit", ctx)       
+    # Create a peer ??
+    toolkit = smgr.createInstanceWithContext('com.sun.star.awt.ExtToolkit', ctx)       
     DialogObj.setVisible(False)       
     DialogObj.createPeer(toolkit, None)
 
-    # execute it
+    # Launch dialog
     DialogObj.execute()
     DialogObj.dispose()
 

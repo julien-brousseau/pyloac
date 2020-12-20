@@ -1,8 +1,12 @@
 # Math
 from math import floor
 
-# Date
-from datetime import datetime, timedelta
+# Date 
+from datetime import datetime, timedelta 
+
+# Filtering extensions
+from com.sun.star.sheet import TableFilterField
+from com.sun.star.sheet.FilterOperator import EQUAL
 
 # Cell values
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
@@ -50,3 +54,12 @@ def ClearContent(rng):
 # Returns the standard string format (YYYY-MM-DD) from a LibreOffice date format (integer)
 def LODateToString(loDate):
   return (datetime.strptime( "1900", '%Y' ) + timedelta(days = int(loDate) - 2)).strftime("%Y-%m-%d")
+ 
+# Used in Sheet filtering
+def FilterField(val):
+  field = TableFilterField()
+  field.Field = 0
+  field.IsNumeric = False
+  field.Operator = EQUAL
+  field.StringValue = val
+  return field
