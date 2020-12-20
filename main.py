@@ -42,8 +42,9 @@ def blop(self):
 def ApplyFilter(self):
   field = 'Type'
   section = Section('Transactions', This())
-  columnIndex = [*filter(lambda f: f['label'] == field, section.Columns)][0]['index']
   value = section.Form().getByName('FldFilter').SelectedValue
+  if not value: return None
+  columnIndex = [*filter(lambda f: f['label'] == field, section.Columns)][0]['index']
   section.Sheet.Filter(section.FirstRow + 1, columnIndex - 1, value)
         
 # Make all rows visible and reset 
