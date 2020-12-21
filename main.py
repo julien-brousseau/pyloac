@@ -73,7 +73,7 @@ def SaveCellAsTransaction(self):
 
   # This character is appended when a cell is saved as transaction
   ignoreFirstCharacter = '_'
-
+ 
   # Fetch selected cell
   cell = Cell(CurrentSelection(), sheet)
   cellContent = cell.value()
@@ -88,8 +88,7 @@ def SaveCellAsTransaction(self):
 
   # Fetch fields and values from header and merge them in dict as field:value
   values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 7)))
-  fields = sheet.GetRangeAsList('A1', 7)
-  fields = dict(list(map(lambda f: (f, values.pop(0)), fields)))
+  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 7))))
 
   # Set correct date instead of day
   fields['Date'] = LODateToString(Cell('A' + str(cell.coords()[1] + 1), sheet).value())
