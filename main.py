@@ -30,11 +30,12 @@ from Utils import LODateToString
 # Returns the coordinates of currently selected cell
 def CurrentSelection(celladdress = False):
   selection = This().CurrentSelection.CellAddress
-  return [selection.Column, selection.Row]
+  return [selection.Column, selection.Row] 
 
-# Test button 
+# Test button  
 def blop(self):
-  return 0
+  pass
+    
     
 # -------------------------------------------------------------------
     
@@ -47,7 +48,7 @@ def ApplyFilter(self):
   columnIndex = [*filter(lambda f: f['label'] == field, section.Columns)][0]['index']
   section.Sheet.Filter(section.FirstRow + 1, columnIndex - 1, value)
         
-# Make all rows visible and reset 
+# Make all rows visible and reset filter field
 def ClearFilters(self):
   section = Section('Transactions', This())
   section.Sheet.ToggleVisibleRows()
@@ -80,7 +81,7 @@ def SaveCellAsTransaction(self):
 
   # Ignore 1. Empty cells / 2. Cells containing already copied data / 3. Cells out of range (date column and headers)
   if not cellContent or str(cellContent)[0] == ignoreFirstCharacter or cell.coords()[0] < 1 or cell.coords()[1] < 13:
-      msgbox("Invalid selection")
+      section.Error("Invalid selection")
       return None
 
   # Add an underscore to the cell value to prevent it from being calculated in Soldes
@@ -109,3 +110,37 @@ def RefreshFilterValues(self):
   section = Section('Transactions', This())  
   values = section.ListFieldValues('Type')
   section.Form().getByName("FldFilter").StringItemList = values
+
+# Soldes - Compile cell values as numbers for all rows up to selected row
+def CompileSoldes(self):
+  sheet = Sheet('Soldes', This())
+  selectedCell = Cell(CurrentSelection(), sheet)
+
+  # Reference column to determine if the row has already been compiled (contains formula)
+  firstColumnIndex = 1
+  # Max column to compile 
+  maxColumnIndex = 40
+  # First row containing data
+  firstRowIndex = 4
+
+  # Break if selected row is part of header
+  if selectedCell.coords()[1] < firstRowIndex: return None
+
+  # Loop through rows up to selected row
+  cell = Cell([firstColumnIndex, firstRowIndex], sheet)
+  while (cell.coords()[1] <= selectedCell.coords()[1]):
+    
+    # Loop through all cells if not already compiled
+    if cell.containsFormula():
+      for colIndex in range(firstColumnIndex, maxColumnIndex + 1):
+
+        # Replace formula with compiled value
+        cellValue = cell.value()
+        cell.setValue(cellValue, 'Integer')
+        cell.offset(1, 0)   
+      
+      # Move cell pointer to first column 
+      cell.move(firstColumnIndex, None)  
+
+    # Move cell pointer to next row
+    cell.offset(0, 1) 

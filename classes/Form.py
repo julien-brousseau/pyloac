@@ -7,7 +7,7 @@ import unohelper
 from com.sun.star.awt import XActionListener
 
 # Debugging tools
-from apso_utils import xray, mri, msgbox 
+# from apso_utils import xray, mri, msgbox 
  
 # --------------------------------------------------------------------------------------------------------
 # Class FORM

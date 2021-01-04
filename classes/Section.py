@@ -11,7 +11,7 @@ from com.sun.star.beans import PropertyValue
 from com.sun.star.util import SortField
    
 # Debugging tools
-from apso_utils import xray, mri, msgbox 
+# from apso_utils import xray, mri, msgbox 
   
 # --------------------------------------------------------------------------------------------------------
 # Class SECTION

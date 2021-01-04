@@ -3,7 +3,7 @@ from Utils import ClearContent
 import datetime
 
 # Debugging tools
-from apso_utils import xray, mri, msgbox
+# from apso_utils import xray, mri, msgbox
 
 # --------------------------------------------------------------------------------------------------------
 # Class CELL
@@ -50,8 +50,10 @@ class Cell:
  
   # Setters
   def setValue(self, value, _type = 'String'):
-    if _type in ['Amount', 'Integer']:
+    if _type == 'Amount':
       self.__range.Value = value
+    elif _type == 'Integer':
+      self.__range.Value = value or 0
     elif _type == 'Date':
       date = self.__dateStrToCalcDate(value)
       self.__range.Value = date
@@ -63,6 +65,12 @@ class Cell:
     # self.__range.Value = value
   def Clear(self):
     ClearContent(self.__range)
+
+  #
+  def containsFormula (self):
+    f = self.__range.Formula
+    if not f: return False
+    return f[0] == '='
 
   # Getters
   def value(self, decimal = False):

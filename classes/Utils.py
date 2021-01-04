@@ -12,7 +12,7 @@ from com.sun.star.sheet.FilterOperator import EQUAL
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
 # Debugging tools
-from apso_utils import xray, mri, msgbox 
+# from apso_utils import xray, mri, msgbox 
 
  
 
