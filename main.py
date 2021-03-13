@@ -1,3 +1,4 @@
+# pylint: disable=F0401
 # Module management
 import sys, os, glob, importlib 
 
@@ -26,7 +27,8 @@ from Cell import Cell
 from Utils import LODateToString 
  
 # -------------------------------------------------------------------
-  
+# Global helpers
+
 # Returns the coordinates of currently selected cell
 def CurrentSelection(celladdress = False):
   selection = This().CurrentSelection.CellAddress
@@ -36,9 +38,9 @@ def CurrentSelection(celladdress = False):
 def blop(self):
   pass
     
-    
 # -------------------------------------------------------------------
-    
+# Transactions helpers
+
 # Filter sheet by transaction type
 def ApplyFilter(self):
   field = 'Type'
@@ -54,6 +56,12 @@ def ClearFilters(self):
   section.Sheet.ToggleVisibleRows()
   section.Form().getByName('FldFilter').SelectedValue = ''
  
+# Auto-refresh values for filter fields based on section data (called on field focus)
+def RefreshFilterValues(self):
+  section = Section('Transactions', This())  
+  values = section.ListFieldValues('Type')
+  section.Form().getByName("FldFilter").StringItemList = values
+
 # Button - Open New transaction form dialog
 def OpenTransactionsForm(self): 
   section = Section('Transactions', This())  
@@ -65,9 +73,11 @@ def GenerateTransactionsSheet(self):
   section.ClearSheet()
   section.BuildColumnHeaders()
 
-# Planification - Record the currently selected planned transaction into Transactions sheet
-# and flags it as recorded by prepending an underscore, preventing it from being calculated
-# as an active transaction in Soldes sheet
+# -------------------------------------------------------------------
+# Planification helpers
+
+# Record the currently selected planned transaction into Transactions sheet and flags it as recorded 
+# by prepending an underscore, preventing it from being calculated as an active transaction in Soldes sheet
 def SaveCellAsTransaction(self):
   section = Section('Transactions', This())
   sheet = Sheet('Planification', This())
@@ -79,7 +89,7 @@ def SaveCellAsTransaction(self):
   cell = Cell(CurrentSelection(), sheet)
   cellContent = cell.value()
 
-  # Ignore 1. Empty cells / 2. Cells containing already copied data / 3. Cells out of range (date column and headers)
+  # Ignore Empty cells, Cells containing already copied data and Cells out of range (date column or headers)
   if not cellContent or str(cellContent)[0] == ignoreFirstCharacter or cell.coords()[0] < 1 or cell.coords()[1] < 13:
       section.Error("Invalid selection")
       return None
@@ -88,8 +98,9 @@ def SaveCellAsTransaction(self):
   cell.setValue(ignoreFirstCharacter + str(cellContent))
 
   # Fetch fields and values from header and merge them in dict as field:value
-  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 7)))
-  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 7))))
+  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 10)))
+  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 10))))
+  fields["Amount"] = float(cellContent)
 
   # Set correct date instead of day
   fields['Date'] = LODateToString(Cell('A' + str(cell.coords()[1] + 1), sheet).value())
@@ -103,13 +114,7 @@ def SaveCellAsTransaction(self):
 def TogglePlanificationHeaders(self):
   sheet = Sheet('Planification', This())
   visible = sheet.Range('A2').getRows()
-  sheet.ToggleVisibleRows('A2:A11', not visible)
-
-# Auto-refresh values for filter fields based on section data (called on field focus)
-def RefreshFilterValues(self):
-  section = Section('Transactions', This())  
-  values = section.ListFieldValues('Type')
-  section.Form().getByName("FldFilter").StringItemList = values
+  sheet.ToggleVisibleRows('A2:A13', not visible)
 
 # Soldes - Compile cell values as numbers for all rows up to selected row
 def CompileSoldes(self):
