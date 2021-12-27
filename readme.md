@@ -12,4 +12,4 @@ This Calc sheet allows to easily manage personal accounting using python scripts
 2. [Optional] Download and install APSO library for debugging (https://extensions.libreoffice.org/en/extensions/show/apso-alternative-script-organizer-for-python)
    Note: The UI tool must be launched at least once every session (Alt + Shift + F11) before using the tools in python scripts
 3. Make sure macros are enabled (Tools > Options > LibreOffice > Security > Macro Security > Switch to medium)
-4. Open main.ods with macros enabled
+4. Open main.ods with macros enabled 
