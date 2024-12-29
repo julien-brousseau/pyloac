@@ -30,7 +30,7 @@ from Utils import LODateToString
 # Global helpers
 
 # Returns the coordinates of currently selected cell
-def CurrentSelection(celladdress = False):
+def CurrentSelection(self):
   selection = This().CurrentSelection.CellAddress
   return [selection.Column, selection.Row] 
 
