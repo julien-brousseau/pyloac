@@ -2,6 +2,10 @@
 # Module management
 import sys, os, glob, importlib 
 
+# Create APSO instance to prevent apso_utils loading errors
+# ctx = XSCRIPTCONTEXT.getComponentContext()
+# ctx.ServiceManager.createInstance("apso.python.script.organizer.impl")
+  
 # Debugging tools 
 # from apso_utils import xray, mri, msgbox 
  
@@ -13,7 +17,7 @@ def This():
 SCRIPTS_DIRECTORY = This().Sheets['Settings'].getCellRangeByName('ScriptsDirectory').String
   
 # Force module reloading to clear cache (or else modules are not rebuilt on edit)
-classes_dir = SCRIPTS_DIRECTORY + "/classes"
+classes_dir = SCRIPTS_DIRECTORY + '/classes'
 sys.path.append(classes_dir)  
 for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
   name = os.path.basename(src_file)[:-3]  
@@ -25,17 +29,17 @@ from Section import Section
 from Sheet import Sheet 
 from Cell import Cell 
 from Utils import LODateToString 
- 
+
 # -------------------------------------------------------------------
 # Global helpers
 
 # Returns the coordinates of currently selected cell
-def CurrentSelection(self):
+def CurrentSelection():
   selection = This().CurrentSelection.CellAddress
   return [selection.Column, selection.Row] 
 
 # Test button  
-def blop(self):
+def blop():
   pass
     
 # -------------------------------------------------------------------
@@ -117,7 +121,7 @@ def TogglePlanificationHeaders(self):
   sheet.ToggleVisibleRows('A2:A13', not visible)
 
 # Soldes - Compile cell values as numbers for all rows up to selected row
-def CompileSoldes(self):
+def CompileSoldes(self = None):
   sheet = Sheet('Soldes', This())
   selectedCell = Cell(CurrentSelection(), sheet)
 
