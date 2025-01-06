@@ -40,6 +40,7 @@ def CurrentSelection():
 
 # Test button  
 def blop():
+  SaveFactureAsTransaction()
   pass
     
 # -------------------------------------------------------------------
@@ -153,3 +154,9 @@ def CompileSoldes(self = None):
 
     # Move cell pointer to next row
     cell.offset(0, 1) 
+
+# -------------------------------------------------------------------
+def SaveFactureAsTransaction(self):
+  sheet = Sheet('Soldes', This())
+  selectedCell = Cell(CurrentSelection(), sheet)
+  # msgbox(selectedCell.text())
