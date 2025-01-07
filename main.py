@@ -28,7 +28,9 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 from Section import Section
 from Sheet import Sheet 
 from Cell import Cell 
-from Utils import LODateToString 
+from Utils import LODateToString, PropValue
+
+import uno
 
 # -------------------------------------------------------------------
 # Global helpers
@@ -39,9 +41,10 @@ def CurrentSelection():
   return [selection.Column, selection.Row] 
 
 # Test button  
-def blop():
-  SaveFactureAsTransaction()
+def blop(self = None):
   pass
+
+settings = Sheet('Settings', This())
     
 # -------------------------------------------------------------------
 # Transactions helpers
@@ -156,7 +159,71 @@ def CompileSoldes(self = None):
     cell.offset(0, 1) 
 
 # -------------------------------------------------------------------
-def SaveFactureAsTransaction(self):
-  sheet = Sheet('Soldes', This())
-  selectedCell = Cell(CurrentSelection(), sheet)
-  # msgbox(selectedCell.text())
+
+# TODO: change PropertyValue for new functions everywhere
+# TODO: change settings for global object?
+
+def GenerateFacture(self = None):
+  facturesDirectory = 'Factures'
+  facturePrintRange = 'B1:E48'
+
+  facturesSheet = Sheet('Factures', This())
+  row = int(Cell(CurrentSelection(), facturesSheet).address()[1])
+
+  # Check if row is valid
+  clientCode = Cell('B' + str(row), facturesSheet).value();
+  if (row < 2) or (not clientCode): 
+    return msgbox('Invalid selection')
+  
+  # Check if facture exists 
+  offset = int(Cell('ClientRowOffset', Sheet('Settings', This())).strval())
+  sheetName = str(row - offset) + '.' + clientCode;
+  if not sheetName in This().Sheets.ElementNames: 
+    return msgbox('Sheet not found: ' + sheetName)
+
+  # Set facture name
+  factureSheet = Sheet(sheetName, This());
+  num = Cell('A' + str(row), facturesSheet).strval()[2:]
+  date = Cell('D' + str(row), facturesSheet).strval()
+  factureName = num + '-' + date + '_' + clientCode + '.pdf'
+
+  # Build facture path - had to use workaround to avoid pathlib parent bug
+  factureUrl = '/'.join(uno.fileUrlToSystemPath(This().URL).split('/')[:-1]) + '/' + facturesDirectory + '/' + factureName
+
+  # Set sent date
+  Cell('K' + str(row), facturesSheet).setValue(date)
+
+  # Render specific fields in facture sheet so their values become static
+  # Client info fields
+  for i in range(10, 14):
+    Cell('B' + str(i), factureSheet).toString()
+  # Date and number
+  Cell('D10', factureSheet).toString()
+  Cell('E10', factureSheet).toString()
+  # Prices
+  for i in range(18, 45):
+    Cell('E' + str(i), factureSheet).toString('Amount')
+ 
+  # Save as pdf
+  This().storeToURL('file://' + factureUrl, PropValue({
+      'FilterName': 'calc_pdf_Export',
+      'FilterData': PropValue({ 'Selection': factureSheet.Range(facturePrintRange) }, True),
+  }))
+ 
+def CreateFacture(self = None):
+  facturesSheet = Sheet('Factures', This())
+
+  # Get client data and generate sheet name
+  client = Cell('FactureClient', facturesSheet).strval()
+  clientCode = Cell('FactureClientCode', facturesSheet).strval()
+  num = Cell('NextFactureNumber', Sheet('Settings', This())).strval()
+  factureSheetName = num + '.' + clientCode;
+
+  # Duplicate template and set client field
+  This().Sheets.copyByName('FactureTemplate', factureSheetName, len(This().Sheets))
+  factureSheet = Sheet(factureSheetName, This())
+  Cell('H10', factureSheet).setValue(client)
+
+  # Add new client facture to the list
+  clientRow = int(Cell('ClientRowOffset', settings).value() + Cell('NextFactureNumber', settings).value())
+  Cell('C' + str(clientRow), facturesSheet).setValue(client)

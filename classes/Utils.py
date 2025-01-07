@@ -11,6 +11,10 @@ from com.sun.star.sheet.FilterOperator import EQUAL
 # Cell values
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, FORMULA
 
+# PropertyValue objects management
+from com.sun.star.beans import PropertyValue
+import uno
+
 # Debugging tools
 # from apso_utils import xray, mri, msgbox 
 
@@ -63,3 +67,9 @@ def FilterField(val):
   field.Operator = EQUAL
   field.StringValue = val
   return field
+
+# Return a dict {name: value} as a PropertyValue object
+def PropValue(values, any = False):
+    ps = tuple([PropertyValue(Name = n, Value = v) for n, v in values.items()])
+    if any: ps = uno.Any('[]com.sun.star.beans.PropertyValue', ps)
+    return ps
