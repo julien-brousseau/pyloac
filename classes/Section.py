@@ -44,7 +44,7 @@ class Section:
     self.RefreshModel()
     self.Columns = [*map(lambda col: {'label': col['label'], 'index': col['column']}, self.Model)]
 
-    self.Today = Cell('Today', Sheet('Settings', self.__documentContext)).toString()
+    self.Today = Cell('Today', Sheet('Settings', self.__documentContext)).strval()
      
   # Reference of form object in the main sheet
   def Form(self):  
@@ -56,7 +56,7 @@ class Section:
     headers = []
     cell = Cell([0, self.__dataFirstRow - 2], self.__dataSheet)
     while cell.value(): 
-        headers.append(cell.toString().lower())
+        headers.append(cell.strval().lower())
         cell.offset(1, 0)
     # Loop through every row and add them as dict to array
     arr = []

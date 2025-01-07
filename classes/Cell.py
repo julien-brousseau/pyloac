@@ -63,10 +63,18 @@ class Cell:
       self.__range.String = str(value)
     # if type(value) is str: self.__range.String = value
     # self.__range.Value = value
+
+  # Render cell content from formula to string (or other type)
+  def toString(self, type = 'String'):
+    value = self.strval()
+    if not value: type = 'String' # hide zero values
+    self.setValue(value, type)
+
+  # Clear cell content
   def Clear(self):
     ClearContent(self.__range)
 
-  #
+  # Check if cell contains a formula
   def containsFormula (self):
     f = self.__range.Formula
     if not f: return False
@@ -74,12 +82,13 @@ class Cell:
 
   # Getters
   def value(self, decimal = False):
-
     if self.__range.CellContentType.value == 'TEXT': return self.__range.String
     elif self.__range.CellContentType.value == 'VALUE': return '{0:.2f}'.format(self.__range.Value) if decimal else self.__range.Value # int(self.__range.Value)
     elif self.__range.CellContentType.value == 'EMPTY': return None
     else: return 'NOT IN RANGE: ' + self.__range.CellContentType.value
-  def toString(self):
+  
+  # Return string value
+  def strval(self):
     return str(self.__range.String)
 
   # Helpers
