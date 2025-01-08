@@ -3,11 +3,11 @@
 import sys, os, glob, importlib 
 
 # Create APSO instance to prevent apso_utils loading errors
-# ctx = XSCRIPTCONTEXT.getComponentContext()
-# ctx.ServiceManager.createInstance("apso.python.script.organizer.impl")
+ctx = XSCRIPTCONTEXT.getComponentContext()
+ctx.ServiceManager.createInstance("apso.python.script.organizer.impl")
   
 # Debugging tools 
-# from apso_utils import xray, mri, msgbox 
+from apso_utils import xray, mri, msgbox 
  
 # Reference to current document
 def This(): 
