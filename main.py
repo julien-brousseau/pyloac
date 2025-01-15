@@ -135,31 +135,27 @@ def CompileSoldes(self = None):
   sheet = Sheet('Soldes', This())
   selectedCell = Cell(CurrentSelection(), sheet)
 
-  # Reference column to determine if the row has already been compiled (contains formula)
-  firstColumnIndex = 1
-  # Max column to compile 
-  maxColumnIndex = 40
-  # First row containing data
-  firstRowIndex = 4
-
+  firstColumn = 1
+  labelsRow = 3
+  
   # Break if selected row is part of header
-  if selectedCell.coords()[1] < firstRowIndex: return None
+  if selectedCell.coords()[1] < labelsRow + 1: 
+    return msgbox('Invalid selection')
 
-  # Loop through rows up to selected row
-  cell = Cell([firstColumnIndex, firstRowIndex], sheet)
-  while (cell.coords()[1] <= selectedCell.coords()[1]):
+  # Loop through all rows
+  lastColumn = sheet.NextEmptyColumn() - 1; 
+  for row in range(labelsRow + 2, selectedCell.coords()[1] + 2):
+
+    # Skip to the first un-rendered row
+    if not Cell([firstColumn, row - 1], sheet).containsFormula(): continue
+
+    # Loop through all columns, and compile formulas into numbers
+    for col in range(firstColumn, lastColumn):
+      cell = Cell(ColumnLabel(col) + str(row), sheet)
+      cellValue = cell.value()
+      cell.setValue(cellValue, 'Integer')
     
-    # Loop through all cells if not already compiled
-    if cell.containsFormula():
-      for colIndex in range(firstColumnIndex, maxColumnIndex + 1):
-
-        # Replace formula with compiled value
-        cellValue = cell.value()
-        cell.setValue(cellValue, 'Integer')
-        cell.offset(1, 0)   
-      
-      # Move cell pointer to first column 
-      cell.move(firstColumnIndex, None)  
+  return
 
 
 # -------------------------------------------------------------------
