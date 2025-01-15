@@ -11,7 +11,7 @@ from com.sun.star.beans import PropertyValue
 from com.sun.star.util import SortField
    
 # Debugging tools
-# from apso_utils import xray, mri, msgbox 
+from apso_utils import xray, mri, msgbox 
   
 # --------------------------------------------------------------------------------------------------------
 # Class SECTION
@@ -87,12 +87,13 @@ class Section:
 
   # Add an error to Data sheet's Error log (or clear log with no argument)
   def Error(self, msg = None):
-    cell = Cell('Error', self.__dataSheet)
-    if not msg: cell.Clear()
-    else: 
-      log = str(cell.value()) if cell.value() != None else ''
-      ts = datetime.now().strftime("%H:%M:%S")
-      cell.setValue(ts + ': ' + str(msg) + '\n' + log)
+    # cell = Cell('Error', self.__dataSheet)
+    # if not msg: cell.Clear()
+    # else: 
+    #   log = str(cell.value()) if cell.value() != None else ''
+    #   ts = datetime.now().strftime("%H:%M:%S")
+    #   cell.setValue(ts + ': ' + str(msg) + '\n' + log)
+    msgbox(msg)
 
   # Show a dialog form based on the Section's Model
   def OpenForm(self):
@@ -105,7 +106,7 @@ class Section:
     # Metadata - Id and Timestamp (autovalue)
     meta = list(filter(lambda f: f['field'] in ['Id', 'TS'], self.Model))
     meta[0]['value'] = Cell('NextId', self.__dataSheet).value()
-    meta[1]['value'] = datetime.now().strftime("%Y-%d-%m %H:%M:%S")
+    meta[1]['value'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     completeData = [*data, *meta]
 
     # Next row index

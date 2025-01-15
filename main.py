@@ -1,6 +1,6 @@
 # pylint: disable=F0401
 # Module management
-import sys, os, glob, importlib 
+import sys, os, glob, importlib, platform, uno
 
 # Create APSO instance to prevent apso_utils loading errors
 ctx = XSCRIPTCONTEXT.getComponentContext()
@@ -14,7 +14,7 @@ def This():
   return XSCRIPTCONTEXT.getDocument()
 
 # Fetch scripts directory from Settings Sheet
-SCRIPTS_DIRECTORY = This().Sheets['Settings'].getCellRangeByName('ScriptsDirectory').String
+SCRIPTS_DIRECTORY = This().Sheets['Settings'].getCellRangeByName(platform.system() + 'ScriptsDirectory').String
   
 # Force module reloading to clear cache (or else modules are not rebuilt on edit)
 classes_dir = SCRIPTS_DIRECTORY + '/classes'
@@ -28,9 +28,8 @@ for src_file in glob.glob(os.path.join(classes_dir, '*.py')):
 from Section import Section
 from Sheet import Sheet 
 from Cell import Cell 
-from Utils import LODateToString, PropValue
+from Utils import LODateToString, PropValue, ColumnLabel
 
-import uno
 
 # -------------------------------------------------------------------
 # Global helpers
@@ -45,7 +44,8 @@ def blop(self = None):
   pass
 
 settings = Sheet('Settings', This())
-    
+
+
 # -------------------------------------------------------------------
 # Transactions helpers
 
@@ -57,7 +57,7 @@ def ApplyFilter(self):
   if not value: return None
   columnIndex = [*filter(lambda f: f['label'] == field, section.Columns)][0]['index']
   section.Sheet.Filter(section.FirstRow + 1, columnIndex - 1, value)
-        
+
 # Make all rows visible and reset filter field
 def ClearFilters(self):
   section = Section('Transactions', This())
@@ -81,6 +81,7 @@ def GenerateTransactionsSheet(self):
   section.ClearSheet()
   section.BuildColumnHeaders()
 
+ 
 # -------------------------------------------------------------------
 # Planification helpers
 
@@ -106,8 +107,9 @@ def SaveCellAsTransaction(self):
   cell.setValue(ignoreFirstCharacter + str(cellContent))
 
   # Fetch fields and values from header and merge them in dict as field:value
-  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 10)))
-  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 10))))
+  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 20)))
+  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 20))))
+
   fields["Amount"] = float(cellContent)
 
   # Set correct date instead of day
@@ -122,7 +124,11 @@ def SaveCellAsTransaction(self):
 def TogglePlanificationHeaders(self):
   sheet = Sheet('Planification', This())
   visible = sheet.Range('A2').getRows()
-  sheet.ToggleVisibleRows('A2:A13', not visible)
+  sheet.ToggleVisibleRows('A3:A16', not visible)
+
+
+# -------------------------------------------------------------------
+# Soldes helpers
 
 # Soldes - Compile cell values as numbers for all rows up to selected row
 def CompileSoldes(self = None):
@@ -155,17 +161,16 @@ def CompileSoldes(self = None):
       # Move cell pointer to first column 
       cell.move(firstColumnIndex, None)  
 
-    # Move cell pointer to next row
-    cell.offset(0, 1) 
 
 # -------------------------------------------------------------------
+# Factures helpers
 
 # TODO: change PropertyValue for new functions everywhere
 # TODO: change settings for global object?
 
-def GenerateFacture(self = None):
+def PrintFacture(self = None):
   facturesDirectory = 'Factures'
-  facturePrintRange = 'B1:E48'
+  facturePrintRange = 'A1:F47'
 
   facturesSheet = Sheet('Factures', This())
   row = int(Cell(CurrentSelection(), facturesSheet).address()[1])
@@ -195,13 +200,13 @@ def GenerateFacture(self = None):
 
   # Render specific fields in facture sheet so their values become static
   # Client info fields
-  for i in range(10, 14):
+  for i in range(9, 14):
     Cell('B' + str(i), factureSheet).toString()
   # Date and number
-  Cell('D10', factureSheet).toString()
-  Cell('E10', factureSheet).toString()
+  Cell('D9', factureSheet).toString()
+  Cell('E9', factureSheet).toString()
   # Prices
-  for i in range(18, 45):
+  for i in range(17, 45): 
     Cell('E' + str(i), factureSheet).toString('Amount')
  
   # Save as pdf

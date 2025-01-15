@@ -31,6 +31,12 @@ class Sheet:
     cursor.gotoEndOfUsedArea(True)
     return cursor.Rows.Count + 1
 
+  # Returns the number of the next empty row in the sheet
+  def NextEmptyColumn(self):
+    cursor = self.Instance.createCursor()
+    cursor.gotoEndOfUsedArea(True)
+    return cursor.Columns.Count + 1
+
   # Returns a list of all cells below a named range, breaks at first empty row or at maxLength
   def GetRangeAsList(self, firstRowRangeName, maxLength = None):
     values = []
@@ -64,3 +70,6 @@ class Sheet:
     filterObject.setPropertyValue("ContainsHeader", False)
     fullRange.filter(filterObject) 
 
+  # Hide sheet
+  def hide(self):
+    self.Instance.IsVisible = False
