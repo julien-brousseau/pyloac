@@ -223,8 +223,48 @@ def CreateFacture(self = None):
   # Duplicate template and set client field
   This().Sheets.copyByName('FactureTemplate', factureSheetName, len(This().Sheets))
   factureSheet = Sheet(factureSheetName, This())
-  Cell('H10', factureSheet).setValue(client)
+  Cell('I9', factureSheet).setValue(client)
 
   # Add new client facture to the list
   clientRow = int(Cell('ClientRowOffset', settings).value() + Cell('NextFactureNumber', settings).value())
   Cell('C' + str(clientRow), facturesSheet).setValue(client)
+
+# 
+def factureToTransactions(self = None):
+  facturesSheet = Sheet('Factures', This())
+  row = int(Cell(CurrentSelection(), facturesSheet).address()[1])
+
+  # Check if row is valid
+  clientCode = Cell('B' + str(row), facturesSheet).value();
+  if (row < 2) or (not clientCode): 
+    return msgbox('Invalid selection')
+  
+  # Check if facture exists 
+  offset = int(Cell('ClientRowOffset', Sheet('Settings', This())).strval())
+  sheetName = str(row - offset) + '.' + clientCode;
+  if not sheetName in This().Sheets.ElementNames: 
+    return msgbox('Sheet not found: ' + sheetName)
+  
+  section = Section('Transactions', This())
+  model = list(filter(lambda f: not f['autovalue'], section.Model))
+
+  date = Cell('D' + str(row), facturesSheet).value()
+  num = Cell('A' + str(row), facturesSheet).value()
+  totalAmount = Cell('F' + str(row), facturesSheet).value()
+  taxesAmount = Cell('G' + str(row), facturesSheet).value() + Cell('I' + str(row), facturesSheet).value()
+
+  # Create payment transaction
+  fields = { 'Date': date, 'Amount': totalAmount, 'Type': 'Dépôt', 'Description': 'Paiement facture #' + num, 'File': 'Comptes', 'FromAccount': '', 'ToAccount': 'The Source', 'User': 'Julien', 'Shared': '' }
+  data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
+  section.AddNewLine(data)
+
+  # Create taxes transaction
+  fields = { 'Date': date, 'Amount': taxesAmount, 'Type': 'Transfert', 'Description': 'TR taxes #' + num, 'File': 'Comptes', 'FromAccount': 'The Source', 'ToAccount': 'The Taxes', 'User': 'Julien', 'Shared': '' }
+  data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
+  section.AddNewLine(data)
+
+  # Mark facture as paid
+  Cell('M' + str(row), facturesSheet).setValue(date)
+
+  # Hide facture sheet
+  Sheet(sheetName, This()).hide()
