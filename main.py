@@ -4,7 +4,7 @@ import sys, os, glob, importlib, platform, uno
 
 # Create APSO instance to prevent apso_utils loading errors
 ctx = XSCRIPTCONTEXT.getComponentContext()
-ctx.ServiceManager.createInstance("apso.python.script.organizer.impl")
+ctx.ServiceManager.createInstance('apso.python.script.organizer.impl')
   
 # Debugging tools 
 from apso_utils import xray, mri, msgbox 
@@ -68,7 +68,7 @@ def ClearFilters(self):
 def RefreshFilterValues(self):
   section = Section('Transactions', This())  
   values = section.ListFieldValues('Type')
-  section.Form().getByName("FldFilter").StringItemList = values
+  section.Form().getByName('FldFilter').StringItemList = values
 
 # Button - Open New transaction form dialog
 def OpenTransactionsForm(self): 
@@ -100,17 +100,19 @@ def SaveCellAsTransaction(self):
 
   # Ignore Empty cells, Cells containing already copied data and Cells out of range (date column or headers)
   if not cellContent or str(cellContent)[0] == ignoreFirstCharacter or cell.coords()[0] < 1 or cell.coords()[1] < 13:
-      section.Error("Invalid selection")
+      section.Error('Invalid selection')
       return None
 
   # Add an underscore to the cell value to prevent it from being calculated in Soldes
   cell.setValue(ignoreFirstCharacter + str(cellContent))
 
   # Fetch fields and values from header and merge them in dict as field:value
-  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + '1', 20)))
-  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A1', 20))))
-
-  fields["Amount"] = float(cellContent)
+  firstFieldRow = '3'
+  nbFields = 11
+  values = list(map(lambda v: v or '', sheet.GetRangeAsList(cell.address()[0] + firstFieldRow , nbFields)))
+  fields = dict(list(map(lambda f: (f, values.pop(0)), sheet.GetRangeAsList('A' + firstFieldRow , nbFields))))
+ 
+  fields['Amount'] = float(cellContent)
 
   # Set correct date instead of day
   fields['Date'] = LODateToString(Cell('A' + str(cell.coords()[1] + 1), sheet).value())
@@ -253,18 +255,20 @@ def factureToTransactions(self = None):
   totalAmount = Cell('F' + str(row), facturesSheet).value()
   taxesAmount = Cell('G' + str(row), facturesSheet).value() + Cell('I' + str(row), facturesSheet).value()
 
+  today = Cell('Today', Sheet('Settings', This())).strval()
+
   # Create payment transaction
-  fields = { 'Date': date, 'Amount': totalAmount, 'Type': 'Dépôt', 'Description': 'Paiement facture #' + num, 'File': 'Comptes', 'FromAccount': '', 'ToAccount': 'The Source', 'User': 'Julien', 'Shared': '' }
+  fields = { 'Date': today, 'Amount': totalAmount, 'Type': 'Dépôt', 'Description': 'Paiement facture #' + num, 'File': 'Comptes', 'FromAccount': '', 'ToAccount': 'The Source', 'User': 'Julien', 'Shared': '' }
   data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
   section.AddNewLine(data)
 
   # Create taxes transaction
-  fields = { 'Date': date, 'Amount': taxesAmount, 'Type': 'Transfert', 'Description': 'TR taxes #' + num, 'File': 'Comptes', 'FromAccount': 'The Source', 'ToAccount': 'The Taxes', 'User': 'Julien', 'Shared': '' }
+  fields = { 'Date': today, 'Amount': taxesAmount, 'Type': 'Transfert', 'Description': 'TR taxes #' + num, 'File': 'Comptes', 'FromAccount': 'The Source', 'ToAccount': 'The Taxes', 'User': 'Julien', 'Shared': '' }
   data = list(map(lambda f: dict(f, value = fields[f['field']] if f['field'] in fields else ' '), model))
   section.AddNewLine(data)
 
   # Mark facture as paid
-  Cell('M' + str(row), facturesSheet).setValue(date)
+  Cell('M' + str(row), facturesSheet).setValue(today)
 
   # Hide facture sheet
   Sheet(sheetName, This()).hide()
