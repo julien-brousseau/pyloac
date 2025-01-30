@@ -81,6 +81,11 @@ def GenerateTransactionsSheet(self):
   section.ClearSheet()
   section.BuildColumnHeaders()
 
+# Button - Toggle Settings
+def ToggleTransactionsSettings(self):
+  settings = Sheet('TransactionsData', This())  
+  settings.toggle()
+
  
 # -------------------------------------------------------------------
 # Planification helpers

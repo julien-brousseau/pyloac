@@ -73,3 +73,7 @@ class Sheet:
   # Hide sheet
   def hide(self):
     self.Instance.IsVisible = False
+
+  # Toggle sheet visibility
+  def toggle(self, visible = None):
+    self.Instance.IsVisible = visible if visible != None else not self.Instance.IsVisible
