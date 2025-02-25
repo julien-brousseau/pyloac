@@ -51,7 +51,7 @@ class Cell:
   # Setters
   def setValue(self, value, _type = 'String'):
     if _type == 'Amount':
-      self.__range.Value = float(value.replace(' ', ''))
+      self.__range.Value = float(str(value).replace(' ', ''))
     elif _type == 'Integer':
       self.__range.Value = value or 0
     elif _type == 'Date':
