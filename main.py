@@ -176,11 +176,11 @@ def PrintFacture(self = None):
   facturePrintRange = 'A1:F47'
 
   facturesSheet = Sheet('Factures', This())
-  row = int(Cell(CurrentSelection(), facturesSheet).address()[1])
+  row = CurrentSelection()[1] + 1 #int(Cell(CurrentSelection(), facturesSheet).address()[1])
 
   # Check if row is valid
   clientCode = Cell('B' + str(row), facturesSheet).value();
-  if (row < 2) or (not clientCode): 
+  if (row < 5) or (not clientCode): 
     return msgbox('Invalid selection')
   
   # Check if facture exists 
